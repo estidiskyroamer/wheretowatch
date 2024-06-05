@@ -1,11 +1,13 @@
 import 'dart:developer';
 import 'dart:math';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/pages/search/search_result.dart';
+import 'package:wheretowatch/pages/settings/settings.dart';
 import 'package:wheretowatch/service/trending.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -62,7 +64,17 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(onPressed: () {}, icon: const Icon(FontAwesomeIcons.gear))
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
+            },
+            icon: const Icon(FontAwesomeIcons.gear),
+          ),
         ],
       ),
       backgroundColor: Theme.of(context).primaryColor,
@@ -82,7 +94,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       Theme.of(context).primaryColor.withAlpha(200),
                       BlendMode.srcATop),
                   fit: BoxFit.cover,
-                  image: NetworkImage(
+                  image: CachedNetworkImageProvider(
                       "${Config().imageUrl}${Config().backdropSize}${backdrops[randomNumber]["backdrop_path"]}"),
                 ),
               ),

@@ -6,8 +6,18 @@ import 'package:wheretowatch/common/config.dart';
 class Configuration {
   getImageConfig() async {
     try {
-      final response = await Config().dio.get(
-          '${Config().baseUrl}/configuration');
+      final response =
+          await Config().dio.get('${Config().baseUrl}/configuration');
+      return response.data;
+    } on DioException catch (e) {
+      inspect(e.message);
+    }
+  }
+
+  getCountries() async {
+    try {
+      final response =
+          await Config().dio.get('${Config().baseUrl}/configuration/countries');
       return response.data;
     } on DioException catch (e) {
       inspect(e.message);

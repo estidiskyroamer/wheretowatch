@@ -20,7 +20,7 @@ class Config {
       options.headers['Authorization'] = "Bearer ${Config().accessToken}";
       return handler.next(options);
     })))
-   ..interceptors.add(PrettyDioLogger(
+    ..interceptors.add(PrettyDioLogger(
         requestHeader: true,
         requestBody: true,
         responseBody: true,

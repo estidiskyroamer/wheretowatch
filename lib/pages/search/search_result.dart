@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
+import 'package:wheretowatch/common/shared_preferences.dart';
 import 'package:wheretowatch/pages/movie/movie_detail.dart';
 import 'package:wheretowatch/service/search.dart';
 
@@ -28,8 +29,10 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
     setState(() {
       result = null;
     });
+    String? countryCode = Prefs().preferences.getString("region");
     String finalQuery = query ?? widget.searchQuery;
-    var response = await Search().getSearchMovie(finalQuery, page);
+    var response =
+        await Search().getSearchMovie(finalQuery, page, countryCode ?? "");
     if (mounted) {
       setState(() {
         result = response;
@@ -72,7 +75,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                     itemBuilder: (context, index) {
                       Map<String, dynamic> item = result["results"][index];
                       int page = result["page"];
-                      DateTime? releaseDate = item.containsKey("release_date") && item["release_date"].toString().isNotEmpty
+                      DateTime? releaseDate = item
+                                  .containsKey("release_date") &&
+                              item["release_date"].toString().isNotEmpty
                           ? DateFormat("yyyy-MM-dd").parse(item["release_date"])
                           : null;
                       if (index < 5 && page == 1) {
@@ -81,7 +86,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                                 decoration: BoxDecoration(
                                     image: DecorationImage(
                                         colorFilter: ColorFilter.mode(
-                                            Colors.black.withAlpha(175),
+                                            Colors.black.withAlpha(125),
                                             BlendMode.srcOver),
                                         fit: BoxFit.cover,
                                         image: NetworkImage(
@@ -138,31 +143,31 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   ListTile resultItem(item, DateTime? releaseDate, BuildContext context) {
     return ListTile(
-      onTap: () async {
-        await Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MovieDetailScreen(movieId: item["id"]),
-          ),
-        );
-      },
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => MovieDetailScreen(movieId: item["id"]),
+            ),
+          );
+        },
         title: Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          releaseDate != null
-              ? "${item["title"]} (${releaseDate.year})"
-              : "${item["title"]}",
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-        item["original_title"] != item["title"]
-            ? Text(
-                item["original_title"],
-                style: Theme.of(context).textTheme.labelSmall,
-              )
-            : const SizedBox(),
-      ],
-    ));
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              releaseDate != null
+                  ? "${item["title"]} (${releaseDate.year})"
+                  : "${item["title"]}",
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            item["original_title"] != item["title"]
+                ? Text(
+                    item["original_title"],
+                    style: Theme.of(context).textTheme.labelSmall,
+                  )
+                : const SizedBox(),
+          ],
+        ));
   }
 }

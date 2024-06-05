@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
+import 'package:wheretowatch/common/shared_preferences.dart';
 import 'package:wheretowatch/pages/search/search.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Prefs().init();
   runApp(const MyApp());
 }
 
@@ -16,10 +19,28 @@ class MyApp extends StatelessWidget {
       title: 'Where To Watch',
       theme: ThemeData(
         primaryColor: HexColor("#092042"),
+        indicatorColor: HexColor("#8896ab"),
         textTheme: TextTheme(
+          titleLarge: const TextStyle(
+            fontSize: 36,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            height: 1.0,
+          ),
+          titleMedium: const TextStyle(
+            fontSize: 28,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            height: 1.0,
+          ),
+          titleSmall: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+            height: 1.0,
+          ),
           bodyLarge: const TextStyle(
             fontSize: 32,
-            fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
           bodyMedium: const TextStyle(
