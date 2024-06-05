@@ -9,7 +9,7 @@ class Movie {
     try {
       final response = await Config().dio.get(
           '${Config().baseUrl}/movie/$id',
-          queryParameters: {'language': language, 'append_to_response': "watch/providers"});
+          queryParameters: {'language': language, 'append_to_response': "watch/providers,releases"});
       return response.data;
     } on DioException catch (e) {
       inspect(e.message);

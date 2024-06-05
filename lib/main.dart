@@ -15,6 +15,10 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    if (!Prefs().preferences.containsKey("region")) {
+      Prefs().preferences.setString("region", "US");
+      Prefs().preferences.setString("region_name", "United States of America");
+    }
     return MaterialApp(
       title: 'Where To Watch',
       theme: ThemeData(

@@ -24,10 +24,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   handleCountries() async {
-    if (!Prefs().preferences.containsKey("region")) {
-      Prefs().preferences.setString("region", "US");
-      Prefs().preferences.setString("region_name", "United States of America");
-    }
     dynamic countryCode = Prefs().preferences.getString("region");
     inspect(countryCode);
     dynamic result = await Configuration().getCountries();
@@ -69,8 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     const ButtonStyleData(padding: EdgeInsets.all(16)),
                 dropdownStyleData: DropdownStyleData(
                     padding: const EdgeInsets.all(8),
-                    width: MediaQuery.of(context).size.width / 1.2,
-                    maxHeight: MediaQuery.of(context).size.height / 1.5,
+                    useRootNavigator: true,
                     decoration:
                         BoxDecoration(color: Theme.of(context).indicatorColor)),
                 hint: Text(
