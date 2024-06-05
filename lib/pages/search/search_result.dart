@@ -1,11 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:loading_indicator/loading_indicator.dart';
 import 'package:wheretowatch/common/config.dart';
-import 'package:wheretowatch/service/master.dart';
+import 'package:wheretowatch/pages/movie/movie_detail.dart';
 import 'package:wheretowatch/service/search.dart';
 
 class SearchResultScreen extends StatefulWidget {
@@ -73,11 +70,9 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                     padding: const EdgeInsets.all(12),
                     itemCount: result["results"].length,
                     itemBuilder: (context, index) {
-                      dynamic item = result["results"][index];
+                      Map<String, dynamic> item = result["results"][index];
                       int page = result["page"];
-                      DateTime? releaseDate = item["release_date"]
-                              .toString()
-                              .isNotEmpty
+                      DateTime? releaseDate = item.containsKey("release_date") && item["release_date"].toString().isNotEmpty
                           ? DateFormat("yyyy-MM-dd").parse(item["release_date"])
                           : null;
                       if (index < 5 && page == 1) {
@@ -143,6 +138,14 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
 
   ListTile resultItem(item, DateTime? releaseDate, BuildContext context) {
     return ListTile(
+      onTap: () async {
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MovieDetailScreen(movieId: item["id"]),
+          ),
+        );
+      },
         title: Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,

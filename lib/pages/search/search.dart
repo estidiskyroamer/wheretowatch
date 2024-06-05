@@ -4,10 +4,9 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/pages/search/search_result.dart';
-import 'package:wheretowatch/service/search.dart';
+import 'package:wheretowatch/service/trending.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -37,7 +36,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   void handleTrendingMovies() async {
-    var response = await Search().getTrendingMovies();
+    var response = await Trending().getTrendingMovies();
     inspect(response);
     if (mounted) {
       setState(() {
@@ -63,7 +62,7 @@ class _SearchScreenState extends State<SearchScreen> {
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         actions: [
-          IconButton(onPressed: () {}, icon: Icon(FontAwesomeIcons.gear))
+          IconButton(onPressed: () {}, icon: const Icon(FontAwesomeIcons.gear))
         ],
       ),
       backgroundColor: Theme.of(context).primaryColor,
@@ -96,7 +95,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                   Container(
-                    padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                     child: TextField(
                       decoration: InputDecoration(
                           hintText: "e.g. ${backdrops[randomNumber]["title"]}",

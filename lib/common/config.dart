@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'dart:convert';
 
 import 'package:loading_indicator/loading_indicator.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';

@@ -30,6 +30,11 @@ class MyApp extends StatelessWidget {
             fontSize: 16,
             color: Colors.white,
           ),
+          labelLarge: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.white.withAlpha(100),
+          ),
           labelMedium: TextStyle(
             fontSize: 16,
             color: Colors.white.withAlpha(100),
