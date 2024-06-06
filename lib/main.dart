@@ -22,8 +22,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Where To Watch',
       theme: ThemeData(
-        primaryColor: HexColor("#092042"),
-        indicatorColor: HexColor("#8896ab"),
+        colorSchemeSeed: HexColor("#092042"),
         textTheme: TextTheme(
           titleLarge: const TextStyle(
             fontSize: 36,
@@ -32,27 +31,27 @@ class MyApp extends StatelessWidget {
             height: 1.0,
           ),
           titleMedium: const TextStyle(
-            fontSize: 28,
+            fontSize: 32,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,
           ),
           titleSmall: const TextStyle(
-            fontSize: 20,
+            fontSize: 26,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,
           ),
           bodyLarge: const TextStyle(
-            fontSize: 32,
+            fontSize: 28,
             color: Colors.white,
           ),
           bodyMedium: const TextStyle(
-            fontSize: 24,
+            fontSize: 16,
             color: Colors.white,
           ),
           bodySmall: const TextStyle(
-            fontSize: 16,
+            fontSize: 12,
             color: Colors.white,
           ),
           labelLarge: TextStyle(

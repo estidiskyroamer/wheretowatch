@@ -4,6 +4,7 @@ import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:wheretowatch/common/shared_preferences.dart';
+import 'package:wheretowatch/pages/movie/common.dart';
 import 'package:wheretowatch/service/configuration.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -50,13 +51,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 icon: const Icon(FontAwesomeIcons.xmark))
           ],
         ),
-        backgroundColor: Theme.of(context).primaryColor,
+        backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         body: Center(
           child: Column(
             children: [
               Text(
                 "Region",
-                style: Theme.of(context).textTheme.bodySmall,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
               DropdownButtonHideUnderline(
                   child: DropdownButton2(
@@ -64,7 +65,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 buttonStyleData:
                     const ButtonStyleData(padding: EdgeInsets.all(16)),
                 dropdownStyleData: DropdownStyleData(
-                    padding: const EdgeInsets.all(8),
+                    padding: padding8,
                     useRootNavigator: true,
                     decoration:
                         BoxDecoration(color: Theme.of(context).indicatorColor)),
@@ -84,10 +85,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     child: Text(
                       country["english_name"],
                       style: selectedCountry != country["iso_3166_1"]
-                          ? Theme.of(context).textTheme.bodySmall
+                          ? Theme.of(context).textTheme.bodyMedium
                           : Theme.of(context)
                               .textTheme
-                              .bodySmall!
+                              .bodyMedium!
                               .copyWith(fontWeight: FontWeight.bold),
                     ),
                   );

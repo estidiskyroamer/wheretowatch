@@ -43,13 +43,13 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         title: TextField(
           controller: searchController,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodyMedium,
           onChanged: (value) {
             if (value.isNotEmpty) {
               handleSearch(1, value);
@@ -119,7 +119,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
                           )),
                       Text(
                         "Page ${result["page"]}/${result["total_pages"]}",
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       IconButton(
                           onPressed: result["page"] < result["total_pages"]
@@ -159,7 +159,7 @@ class _SearchResultScreenState extends State<SearchResultScreen> {
               releaseDate != null
                   ? "${item["title"]} (${releaseDate.year})"
                   : "${item["title"]}",
-              style: Theme.of(context).textTheme.bodySmall,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             item["original_title"] != item["title"]
                 ? Text(

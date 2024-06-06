@@ -4,9 +4,10 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
-import 'package:wheretowatch/common/component.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/common/shared_preferences.dart';
+import 'package:wheretowatch/pages/movie/cast.dart';
+import 'package:wheretowatch/pages/movie/common.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
 import 'package:wheretowatch/service/movie.dart';
 
@@ -18,15 +19,37 @@ class MovieDetailScreen extends StatefulWidget {
   State<MovieDetailScreen> createState() => _MovieDetailScreenState();
 }
 
-class _MovieDetailScreenState extends State<MovieDetailScreen> {
+class _MovieDetailScreenState extends State<MovieDetailScreen>
+    with SingleTickerProviderStateMixin {
   Map<String, dynamic> movieDetail = {};
-  String? countryCode;
-  String? countryName;
+  String? _countryCode;
+  String? _countryName;
   String? watchLink;
-  List<dynamic> adStreaming = [];
-  List<dynamic> buyStreaming = [];
-  List<dynamic> flatrateStreaming = [];
-  List<dynamic> rentStreaming = [];
+
+  DateTime? releaseDate;
+  String genreNameList = "";
+  String certification = "";
+
+  List<dynamic> streamingServiceList = [];
+  late TabController _tabController;
+  int activeTabIndex = 0;
+  List<Widget> tabs = const [
+    Tab(
+      text: "Subscription",
+    ),
+    Tab(
+      text: "Buy",
+    ),
+    Tab(
+      text: "Rent",
+    ),
+    Tab(
+      text: "Ad-supported",
+    ),
+  ];
+
+  List<dynamic> cast = [];
+  List<dynamic> mainCrew = [];
 
   @override
   void initState() {
@@ -36,26 +59,87 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   handleMovieDetail() async {
     dynamic result = await Movie().getMovieDetail(widget.movieId);
-    dynamic _countryCode = Prefs().preferences.getString("region");
-    dynamic _countryName = Prefs().preferences.getString("region_name");
+    dynamic countryCode = Prefs().preferences.getString("region");
+    dynamic countryName = Prefs().preferences.getString("region_name");
     if (mounted) {
       setState(() {
         movieDetail = result;
-        countryCode = _countryCode;
-        countryName = _countryName;
+
+        releaseDate = movieDetail.containsKey("release_date") &&
+                movieDetail["release_date"].toString().isNotEmpty
+            ? DateFormat("yyyy-MM-dd").parse(movieDetail["release_date"])
+            : null;
+
+        List<dynamic> genres =
+            movieDetail.containsKey("genres") && movieDetail["genres"] != null
+                ? movieDetail["genres"]
+                : [];
+        List<String> genreNames = genres.isNotEmpty
+            ? genres.map((genre) => genre["name"] as String).toList()
+            : [];
+        genreNameList = genreNames.isNotEmpty ? genreNames.join(', ') : "";
+
+        List<dynamic> releases = movieDetail.containsKey("releases") &&
+                movieDetail["releases"]["countries"] != null
+            ? movieDetail["releases"]["countries"]
+            : [];
+
+        for (var item in releases) {
+          if (item["iso_3166_1"] == _countryCode &&
+              item["certification"] != "") {
+            certification = item["certification"];
+          } else {
+            if (item["iso_3166_1"] == "US") {
+              certification = item["certification"];
+            }
+          }
+        }
+
+        _countryCode = countryCode;
+        _countryName = countryName;
         if (movieDetail["watch/providers"]["results"]
             .containsKey(countryCode)) {
           Map<String, dynamic> watchProviders =
               movieDetail["watch/providers"]["results"][countryCode];
-          adStreaming =
+          List<dynamic> adStreaming =
               watchProviders.containsKey("ads") ? watchProviders["ads"] : [];
-          buyStreaming =
+          List<dynamic> buyStreaming =
               watchProviders.containsKey("buy") ? watchProviders["buy"] : [];
-          flatrateStreaming = watchProviders.containsKey("flatrate")
-              ? watchProviders["flatrate"]
-              : [];
-          rentStreaming =
+          List<dynamic> flatrateStreaming =
+              watchProviders.containsKey("flatrate")
+                  ? watchProviders["flatrate"]
+                  : [];
+          List<dynamic> rentStreaming =
               watchProviders.containsKey("rent") ? watchProviders["rent"] : [];
+          streamingServiceList = [
+            flatrateStreaming,
+            buyStreaming,
+            rentStreaming,
+            adStreaming
+          ];
+        }
+        _tabController =
+            TabController(length: streamingServiceList.length, vsync: this);
+        _tabController.addListener(() {
+          setState(() {
+            activeTabIndex = _tabController.index;
+          });
+        });
+
+        if (movieDetail["credits"].containsKey("cast")) {
+          cast = movieDetail["credits"]["cast"];
+        }
+        if (movieDetail["credits"].containsKey("crew")) {
+          List<dynamic> crew = movieDetail["credits"]["crew"];
+          List<dynamic> producers =
+              crew.where((item) => item["job"] == "Producer").toList();
+          List<dynamic> directors =
+              crew.where((item) => item["job"] == "Director").toList();
+          List<dynamic> writers = crew
+              .where((item) =>
+                  item["job"] == "Screenplay" || item["job"] == "Writer")
+              .toList();
+          mainCrew = [...directors, ...producers, ...writers];
         }
       });
     }
@@ -63,45 +147,12 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime? releaseDate = movieDetail.containsKey("release_date") &&
-            movieDetail["release_date"].toString().isNotEmpty
-        ? DateFormat("yyyy-MM-dd").parse(movieDetail["release_date"])
-        : null;
-
-    List<dynamic> genres =
-        movieDetail.containsKey("genres") && movieDetail["genres"] != null
-            ? movieDetail["genres"]
-            : [];
-    List<String> genreNames = genres.isNotEmpty
-        ? genres.map((genre) => genre["name"] as String).toList()
-        : [];
-    String genreNameList = genreNames.isNotEmpty ? genreNames.join(', ') : "";
-
-    List<dynamic> releases = movieDetail.containsKey("releases") &&
-            movieDetail["releases"]["countries"] != null
-        ? movieDetail["releases"]["countries"]
-        : [];
-    String certification = "";
-    releases.forEach((item) {
-      if (item["iso_3166_1"] == countryCode && item["certification"] != "") {
-        certification = item["certification"];
-      } else {
-        if (item["iso_3166_1"] == "US") {
-          certification = item["certification"];
-        }
-      }
-    });
-
-    inspect(adStreaming);
-    inspect(buyStreaming);
-    inspect(flatrateStreaming);
-    inspect(rentStreaming);
-
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
         actions: [
           IconButton(
               onPressed: () {
@@ -115,7 +166,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
               icon: const Icon(FontAwesomeIcons.gear))
         ],
       ),
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       body: movieDetail.entries.isEmpty
           ? Center(
               child: SizedBox(
@@ -129,7 +180,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                   Container(
                     width: double.infinity,
                     height: MediaQuery.of(context).size.height / 3,
-                    padding: const EdgeInsets.all(16),
+                    padding: padding16,
                     decoration: movieDetail["backdrop_path"] != null
                         ? BoxDecoration(
                             image: DecorationImage(
@@ -146,9 +197,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                       children: [
                         Text(
                           releaseDate != null
-                              ? "${movieDetail["title"]} (${releaseDate.year})"
+                              ? "${movieDetail["title"]} (${releaseDate!.year})"
                               : "${movieDetail["title"]}",
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleLarge,
                           textAlign: TextAlign.center,
                         ),
                         movieDetail["title"] != movieDetail["original_title"]
@@ -162,7 +213,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                   ),
                   Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: padding16,
                       child: Text(
                         movieDetail["tagline"].isNotEmpty
                             ? "\"${movieDetail["tagline"]}\""
@@ -173,7 +224,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                             .copyWith(fontStyle: FontStyle.italic),
                       )),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                    padding: padding16,
                     child: Row(
                       children: [
                         movieDetail.containsKey("poster_path") &&
@@ -201,7 +252,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                     borderRadius: BorderRadius.circular(4)),
                                 child: Text(
                                   certification,
-                                  style: Theme.of(context).textTheme.bodySmall,
+                                  style: Theme.of(context).textTheme.bodyMedium,
                                 ),
                               ),
                               iconWithText(context, FontAwesomeIcons.star,
@@ -210,7 +261,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                   context,
                                   FontAwesomeIcons.calendarCheck,
                                   releaseDate != null
-                                      ? "${movieDetail["status"]} ${DateFormat('d MMMM y').format(releaseDate)}"
+                                      ? "${movieDetail["status"]} ${DateFormat('d MMMM y').format(releaseDate!)}"
                                       : movieDetail["status"]),
                               iconWithText(context, FontAwesomeIcons.clock,
                                   "${movieDetail["runtime"]} minutes"),
@@ -223,18 +274,42 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                     ),
                   ),
                   Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                          countryName != null
-                              ? "Where to Watch in $countryName"
-                              : "Where to Watch",
-                          style: Theme.of(context).textTheme.titleSmall)),
+                      padding: padding16,
+                      child: Column(
+                        children: [
+                          Text(
+                            _countryName != null
+                                ? "Where to Watch in $_countryName"
+                                : "Where to Watch",
+                            style: Theme.of(context).textTheme.titleMedium,
+                            textAlign: TextAlign.center,
+                          ),
+                          Text(
+                            "Powered by JustWatch",
+                            style: Theme.of(context).textTheme.labelSmall,
+                          ),
+                        ],
+                      )),
                   Container(
-                    padding: const EdgeInsets.all(16),
+                      padding: padding16,
+                      child: TabBar(
+                        controller: _tabController,
+                        labelStyle: Theme.of(context).textTheme.bodyMedium,
+                        labelColor:
+                            Theme.of(context).colorScheme.inversePrimary,
+                        unselectedLabelColor: Colors.white,
+                        indicatorColor:
+                            Theme.of(context).colorScheme.inversePrimary,
+                        dividerHeight: 0,
+                        tabs: tabs,
+                      )),
+                  Container(
+                    padding: padding16,
                     child: GridView.builder(
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,
-                        itemCount: flatrateStreaming.length,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: streamingServiceList[activeTabIndex].length,
                         gridDelegate:
                             const SliverGridDelegateWithFixedCrossAxisCount(
                                 crossAxisCount: 4,
@@ -242,39 +317,137 @@ class _MovieDetailScreenState extends State<MovieDetailScreen> {
                                 mainAxisSpacing: 8,
                                 crossAxisSpacing: 8),
                         itemBuilder: (context, index) {
-                          return Container(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                CachedNetworkImage(
-                                    height: 48,
-                                    imageUrl:
-                                        "${Config().imageUrl}${Config().logoSize}${flatrateStreaming[index]["logo_path"]}"),
-                                /* Image.network(
-                                    height: 48,
-                                    ), */
-                                Text(
-                                  flatrateStreaming[index]["provider_name"],
-                                  style: Theme.of(context).textTheme.bodySmall,
-                                  textAlign: TextAlign.center,
-                                )
-                              ],
-                            ),
-                          );
+                          inspect(streamingServiceList[activeTabIndex]);
+                          return streamingServiceItem(context,
+                              streamingServiceList[activeTabIndex][index]);
                         }),
                   ),
                   Container(
-                      padding: const EdgeInsets.all(16),
-                      child: Text("Details",
-                          style: Theme.of(context).textTheme.titleSmall)),
+                      padding: padding16,
+                      child: Text("Overview",
+                          style: Theme.of(context).textTheme.titleMedium)),
                   Container(
-                      padding: const EdgeInsets.all(16),
+                      padding: padding16,
                       child: Text(
                         movieDetail["overview"].isNotEmpty
                             ? "${movieDetail["overview"]}"
                             : "",
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: Theme.of(context).textTheme.bodyMedium,
                       )),
+                  Container(
+                      padding: padding16,
+                      child: Text("Production",
+                          style: Theme.of(context).textTheme.titleMedium)),
+                  Container(
+                      padding: padding16,
+                      child: Text("Cast",
+                          style: Theme.of(context).textTheme.titleSmall)),
+                  Container(
+                    height: MediaQuery.of(context).size.height / 5,
+                    padding: padding16,
+                    child: ListView.builder(
+                      itemCount: cast.length <= 10 ? cast.length : 11,
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        bool isLastItem = (index ==
+                            (cast.length <= 10 ? cast.length - 1 : 10));
+                        if (isLastItem) {
+                          return GestureDetector(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      MovieCastScreen(cast: cast),
+                                ),
+                              );
+                            },
+                            child: Container(
+                              height: MediaQuery.of(context).size.height / 5,
+                              width: MediaQuery.of(context).size.width / 4,
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: padding4,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                    width: 1.5),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "View all cast...",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .inversePrimary),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return castItem(context, cast[index]);
+                        }
+                      },
+                    ),
+                  ),
+                  Container(
+                      padding: padding16,
+                      child: Text("Crew",
+                          style: Theme.of(context).textTheme.titleSmall)),
+                  Container(
+                    height: MediaQuery.of(context).size.height / 5,
+                    padding: padding16,
+                    child: ListView.builder(
+                      itemCount: 6,
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 5) {
+                          return GestureDetector(
+                            onTap: () {},
+                            child: Container(
+                              height: MediaQuery.of(context).size.height / 5,
+                              width: MediaQuery.of(context).size.width / 4,
+                              margin: const EdgeInsets.only(right: 8),
+                              padding: padding4,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .inversePrimary,
+                                    width: 1.5),
+                              ),
+                              child: Center(
+                                child: Text(
+                                  "View all crew...",
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium!
+                                      .copyWith(
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .inversePrimary),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else {
+                          return crewItem(context, mainCrew[index]);
+                        }
+                      },
+                    ),
+                  ),
                 ],
               ),
             ),

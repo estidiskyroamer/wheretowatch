@@ -10,10 +10,11 @@ class Config {
       "eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiI4YWNjZWRmMTExZTU5ZmIxNjBmZjM1NjFjN2M5MGUwZSIsInN1YiI6IjYxYmE4ZDk3MjhkN2ZlMDA0M2VjZjgzNCIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.Geq8PJdk6by2Xl5fG0SOicHJFvUlxHpg_-xif7kn47Y";
   String baseUrl = "https://api.themoviedb.org/3";
   String imageUrl = "https://image.tmdb.org/t/p/";
-  String backdropSize = "w1280";
-  String posterSize = "w780";
+  String backdropSize = "w780";
+  String posterSize = "w500";
   String stillSize = "w300";
-  String logoSize = "w154";
+  String logoSize = "w92";
+  String profileSize = "w185";
   Dio dio = Dio()
     ..interceptors.add(InterceptorsWrapper(onRequest: ((options, handler) {
       options.headers['accept'] = "application/json";

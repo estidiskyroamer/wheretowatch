@@ -77,7 +77,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
       extendBodyBehindAppBar: true,
       body: backdrops == null
           ? Center(
@@ -91,7 +91,7 @@ class _SearchScreenState extends State<SearchScreen> {
               decoration: BoxDecoration(
                 image: DecorationImage(
                   colorFilter: ColorFilter.mode(
-                      Theme.of(context).primaryColor.withAlpha(200),
+                      Theme.of(context).colorScheme.onPrimaryContainer.withAlpha(200),
                       BlendMode.srcATop),
                   fit: BoxFit.cover,
                   image: CachedNetworkImageProvider(
@@ -104,7 +104,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 children: [
                   Text(
                     "What do you want to watch?",
-                    style: Theme.of(context).textTheme.bodyMedium,
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   Container(
                     padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
@@ -113,7 +113,7 @@ class _SearchScreenState extends State<SearchScreen> {
                           hintText: "e.g. ${backdrops[randomNumber]["title"]}",
                           hintStyle: Theme.of(context).textTheme.labelMedium),
                       controller: searchController,
-                      style: Theme.of(context).textTheme.bodySmall,
+                      style: Theme.of(context).textTheme.bodyMedium,
                       onChanged: (value) {
                         if (value.isNotEmpty) {
                           handleSearch(value);
