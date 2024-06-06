@@ -70,6 +70,8 @@ Widget castItem(BuildContext context, Map<String, dynamic> item) {
       children: [
         Text(
           item["name"],
+          maxLines: 2,
+          overflow: TextOverflow.fade,
           style: Theme.of(context)
               .textTheme
               .bodySmall!
@@ -77,6 +79,8 @@ Widget castItem(BuildContext context, Map<String, dynamic> item) {
         ),
         Text(
           item["character"],
+          maxLines: 3,
+          overflow: TextOverflow.fade,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],

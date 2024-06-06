@@ -31,13 +31,13 @@ class MyApp extends StatelessWidget {
             height: 1.0,
           ),
           titleMedium: const TextStyle(
-            fontSize: 32,
+            fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,
           ),
           titleSmall: const TextStyle(
-            fontSize: 26,
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,

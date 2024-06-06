@@ -8,6 +8,7 @@ import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/common/shared_preferences.dart';
 import 'package:wheretowatch/pages/movie/cast.dart';
 import 'package:wheretowatch/pages/movie/common.dart';
+import 'package:wheretowatch/pages/movie/crew.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
 import 'package:wheretowatch/service/movie.dart';
 
@@ -30,7 +31,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   String genreNameList = "";
   String certification = "";
 
-  List<dynamic> streamingServiceList = [];
+  List<dynamic> streamingServiceList = [[],[],[],[]];
   late TabController _tabController;
   int activeTabIndex = 0;
   List<Widget> tabs = const [
@@ -49,7 +50,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   ];
 
   List<dynamic> cast = [];
+  List<dynamic> crew = [];
   List<dynamic> mainCrew = [];
+
+  List<dynamic> productionCompanies = [];
+  List<dynamic> productionCountries = [];
 
   @override
   void initState() {
@@ -130,7 +135,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
           cast = movieDetail["credits"]["cast"];
         }
         if (movieDetail["credits"].containsKey("crew")) {
-          List<dynamic> crew = movieDetail["credits"]["crew"];
+          crew = movieDetail["credits"]["crew"];
           List<dynamic> producers =
               crew.where((item) => item["job"] == "Producer").toList();
           List<dynamic> directors =
@@ -141,6 +146,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
               .toList();
           mainCrew = [...directors, ...producers, ...writers];
         }
+
+        productionCompanies = movieDetail["production_companies"];
+        productionCountries = movieDetail["production_countries"];
       });
     }
   }
@@ -305,7 +313,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                       )),
                   Container(
                     padding: padding16,
-                    child: GridView.builder(
+                    child: streamingServiceList.isNotEmpty ? GridView.builder(
                         padding: EdgeInsets.zero,
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -320,7 +328,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                           inspect(streamingServiceList[activeTabIndex]);
                           return streamingServiceItem(context,
                               streamingServiceList[activeTabIndex][index]);
-                        }),
+                        }) : const SizedBox(),
                   ),
                   Container(
                       padding: padding16,
@@ -346,13 +354,13 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                     height: MediaQuery.of(context).size.height / 5,
                     padding: padding16,
                     child: ListView.builder(
-                      itemCount: cast.length <= 10 ? cast.length : 11,
+                      itemCount: cast.length <= 10 ? cast.length + 1 : 11,
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (BuildContext context, int index) {
-                        bool isLastItem = (index ==
-                            (cast.length <= 10 ? cast.length - 1 : 10));
+                        bool isLastItem =
+                            (index == (cast.length <= 10 ? cast.length : 10));
                         if (isLastItem) {
                           return GestureDetector(
                             onTap: () {
@@ -406,14 +414,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                     height: MediaQuery.of(context).size.height / 5,
                     padding: padding16,
                     child: ListView.builder(
-                      itemCount: 6,
+                      itemCount:
+                          mainCrew.length <= 10 ? mainCrew.length + 1 : 11,
                       shrinkWrap: true,
                       physics: const ClampingScrollPhysics(),
                       scrollDirection: Axis.horizontal,
                       itemBuilder: (BuildContext context, int index) {
-                        if (index == 5) {
+                        bool isLastItem = (index ==
+                            (mainCrew.length <= 10 ? mainCrew.length : 10));
+                        if (isLastItem) {
                           return GestureDetector(
-                            onTap: () {},
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      MovieCrewScreen(crew: crew),
+                                ),
+                              );
+                            },
                             child: Container(
                               height: MediaQuery.of(context).size.height / 5,
                               width: MediaQuery.of(context).size.width / 4,
@@ -448,6 +467,31 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                       },
                     ),
                   ),
+                  Container(
+                      padding: padding16,
+                      child: Text("Details",
+                          style: Theme.of(context).textTheme.titleSmall)),
+                  /* ListView(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      ListTile(
+                        leading: Text(
+                          "Production Companies",
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodySmall!
+                              .copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        trailing: ListView.builder(
+                          itemCount: movieDetail["production_companies"].length,
+                          itemBuilder: (BuildContext context, int index) {
+                            return Text(productionCompanies[index]["name"]);
+                          },
+                        ),
+                      )
+                    ],
+                  ) */
                 ],
               ),
             ),
