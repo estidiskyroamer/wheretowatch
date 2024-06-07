@@ -16,19 +16,20 @@ class Config {
   String logoSize = "w92";
   String profileSize = "w185";
   Dio dio = Dio()
-    ..interceptors.add(InterceptorsWrapper(onRequest: ((options, handler) {
-      options.headers['accept'] = "application/json";
-      options.headers['Authorization'] = "Bearer ${Config().accessToken}";
-      return handler.next(options);
-    })))
-    ..interceptors.add(PrettyDioLogger(
+        ..interceptors.add(InterceptorsWrapper(onRequest: ((options, handler) {
+          options.headers['accept'] = "application/json";
+          options.headers['Authorization'] = "Bearer ${Config().accessToken}";
+          return handler.next(options);
+        })))
+      /* ..interceptors.add(PrettyDioLogger(
         requestHeader: true,
         requestBody: true,
         responseBody: true,
         responseHeader: false,
         error: true,
         compact: true,
-        maxWidth: 90));
+        maxWidth: 90)) */
+      ;
   LoadingIndicator loadingIndicator = LoadingIndicator(
     indicatorType: Indicator.ballPulseSync,
     colors: [

@@ -59,48 +59,54 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 "Region",
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              DropdownButtonHideUnderline(
-                  child: DropdownButton2(
-                isExpanded: true,
-                buttonStyleData:
-                    const ButtonStyleData(padding: EdgeInsets.all(16)),
-                dropdownStyleData: DropdownStyleData(
+              Container(
+                padding: padding16,
+                child: DropdownButtonHideUnderline(
+                    child: DropdownButton2(
+                  isExpanded: true,
+                  buttonStyleData: ButtonStyleData(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(16),
+                          color: Theme.of(context).colorScheme.inverseSurface)),
+                  dropdownStyleData: DropdownStyleData(
                     padding: padding8,
                     useRootNavigator: true,
-                    decoration:
-                        BoxDecoration(color: Theme.of(context).indicatorColor)),
-                hint: Text(
-                  'Select Item',
-                  style: Theme.of(context).textTheme.labelMedium,
-                ),
-                value: countries.isNotEmpty ? selectedCountry : null,
-                items: countries.map((country) {
-                  if (selectedCountry == country["iso_3166_1"]) {
-                    Prefs()
-                        .preferences
-                        .setString("region_name", country["english_name"]);
-                  }
-                  return DropdownMenuItem<String>(
-                    value: country["iso_3166_1"],
-                    child: Text(
-                      country["english_name"],
-                      style: selectedCountry != country["iso_3166_1"]
-                          ? Theme.of(context).textTheme.bodyMedium
-                          : Theme.of(context)
-                              .textTheme
-                              .bodyMedium!
-                              .copyWith(fontWeight: FontWeight.bold),
-                    ),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  setState(() {
-                    inspect(value);
-                    selectedCountry = value;
-                    Prefs().preferences.setString("region", selectedCountry!);
-                  });
-                },
-              ))
+                    decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.inverseSurface),
+                  ),
+                  hint: Text(
+                    'Select Item',
+                    style: Theme.of(context).textTheme.labelMedium,
+                  ),
+                  value: countries.isNotEmpty ? selectedCountry : null,
+                  items: countries.map((country) {
+                    if (selectedCountry == country["iso_3166_1"]) {
+                      Prefs()
+                          .preferences
+                          .setString("region_name", country["english_name"]);
+                    }
+                    return DropdownMenuItem<String>(
+                      value: country["iso_3166_1"],
+                      child: Text(
+                        country["english_name"],
+                        style: selectedCountry != country["iso_3166_1"]
+                            ? Theme.of(context).textTheme.bodyMedium
+                            : Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      inspect(value);
+                      selectedCountry = value;
+                      Prefs().preferences.setString("region", selectedCountry!);
+                    });
+                  },
+                )),
+              )
             ],
           ),
         ));

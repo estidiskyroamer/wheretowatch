@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:wheretowatch/common/config.dart';
+import 'package:wheretowatch/pages/movie/common.dart';
 import 'package:wheretowatch/pages/search/search_result.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
 import 'package:wheretowatch/service/trending.dart';
@@ -88,10 +89,14 @@ class _SearchScreenState extends State<SearchScreen> {
             )
           : Container(
               height: double.infinity,
+              width: double.infinity,
               decoration: BoxDecoration(
                 image: DecorationImage(
                   colorFilter: ColorFilter.mode(
-                      Theme.of(context).colorScheme.onPrimaryContainer.withAlpha(200),
+                      Theme.of(context)
+                          .colorScheme
+                          .onPrimaryContainer
+                          .withAlpha(200),
                       BlendMode.srcATop),
                   fit: BoxFit.cover,
                   image: CachedNetworkImageProvider(
@@ -99,26 +104,55 @@ class _SearchScreenState extends State<SearchScreen> {
                 ),
               ),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Text(
-                    "What do you want to watch?",
-                    style: Theme.of(context).textTheme.bodyLarge,
+                  Flexible(
+                    flex: 5,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "What do you want to watch?",
+                          style: Theme.of(context).textTheme.bodyLarge,
+                        ),
+                        Container(
+                          padding: padding16,
+                          child: TextField(
+                            decoration: InputDecoration(
+                                hintText:
+                                    "e.g. ${backdrops[randomNumber]["title"]}",
+                                hintStyle:
+                                    Theme.of(context).textTheme.labelMedium),
+                            controller: searchController,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                            onChanged: (value) {
+                              if (value.isNotEmpty) {
+                                handleSearch(value);
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                  Container(
-                    padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-                    child: TextField(
-                      decoration: InputDecoration(
-                          hintText: "e.g. ${backdrops[randomNumber]["title"]}",
-                          hintStyle: Theme.of(context).textTheme.labelMedium),
-                      controller: searchController,
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      onChanged: (value) {
-                        if (value.isNotEmpty) {
-                          handleSearch(value);
-                        }
-                      },
+                  Flexible(
+                    flex: 1,
+                    child: Container(
+                      padding: padding16,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            "W2W",
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          Text(
+                            "Powered by TMDB and JustWatch",
+                            style: Theme.of(context).textTheme.labelSmall,
+                          )
+                        ],
+                      ),
                     ),
                   )
                 ],

@@ -1,6 +1,8 @@
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:currency_formatter/currency_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
@@ -22,6 +24,9 @@ class MovieDetailScreen extends StatefulWidget {
 
 class _MovieDetailScreenState extends State<MovieDetailScreen>
     with SingleTickerProviderStateMixin {
+  final ScrollController _scrollController = ScrollController();
+  bool _isScrolled = false;
+
   Map<String, dynamic> movieDetail = {};
   String? _countryCode;
   String? _countryName;
@@ -31,7 +36,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   String genreNameList = "";
   String certification = "";
 
-  List<dynamic> streamingServiceList = [[],[],[],[]];
+  List<dynamic> streamingServiceList = [[], [], [], []];
   late TabController _tabController;
   int activeTabIndex = 0;
   List<Widget> tabs = const [
@@ -56,10 +61,21 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   List<dynamic> productionCompanies = [];
   List<dynamic> productionCountries = [];
 
+  String budget = "";
+  String revenue = "";
+
   @override
   void initState() {
     handleMovieDetail();
+    _scrollController.addListener(_scrollListener);
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_scrollListener);
+    _scrollController.dispose();
+    super.dispose();
   }
 
   handleMovieDetail() async {
@@ -149,6 +165,29 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
 
         productionCompanies = movieDetail["production_companies"];
         productionCountries = movieDetail["production_countries"];
+
+        if (movieDetail.containsKey("budget") &&
+            movieDetail["budget"] != null) {
+          budget = CurrencyFormatter.format(
+              movieDetail["budget"], CurrencyFormat.usd);
+        }
+        if (movieDetail.containsKey("revenue") &&
+            movieDetail["revenue"] != null) {
+          revenue = CurrencyFormatter.format(
+              movieDetail["revenue"], CurrencyFormat.usd);
+        }
+      });
+    }
+  }
+
+  void _scrollListener() {
+    if (_scrollController.position.pixels > 0 && !_isScrolled) {
+      setState(() {
+        _isScrolled = true;
+      });
+    } else if (_scrollController.position.pixels == 0 && _isScrolled) {
+      setState(() {
+        _isScrolled = false;
       });
     }
   }
@@ -161,6 +200,16 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
         backgroundColor: Colors.transparent,
         foregroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
+        flexibleSpace: _isScrolled
+            ? ClipRect(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
+                  child: Container(
+                    color: Colors.transparent,
+                  ),
+                ),
+              )
+            : null,
         actions: [
           IconButton(
               onPressed: () {
@@ -183,6 +232,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
               ),
             )
           : SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 children: [
                   Container(
@@ -251,18 +301,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                margin: const EdgeInsets.fromLTRB(16, 0, 0, 16),
-                                decoration: BoxDecoration(
-                                    border: Border.all(
-                                        color: Colors.white, width: 1.0),
-                                    borderRadius: BorderRadius.circular(4)),
-                                child: Text(
-                                  certification,
-                                  style: Theme.of(context).textTheme.bodyMedium,
-                                ),
-                              ),
+                              certification.isNotEmpty
+                                  ? Container(
+                                      padding:
+                                          const EdgeInsets.fromLTRB(8, 2, 8, 2),
+                                      margin: const EdgeInsets.fromLTRB(
+                                          16, 0, 0, 16),
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: Colors.white, width: 1.0),
+                                          borderRadius:
+                                              BorderRadius.circular(4)),
+                                      child: Text(
+                                        certification,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium,
+                                      ),
+                                    )
+                                  : const SizedBox(),
                               iconWithText(context, FontAwesomeIcons.star,
                                   "${double.parse((movieDetail["vote_average"]).toStringAsFixed(2))} (TMDB)"),
                               iconWithText(
@@ -313,22 +370,25 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                       )),
                   Container(
                     padding: padding16,
-                    child: streamingServiceList.isNotEmpty ? GridView.builder(
-                        padding: EdgeInsets.zero,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: streamingServiceList[activeTabIndex].length,
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 4,
-                                childAspectRatio: 0.8,
-                                mainAxisSpacing: 8,
-                                crossAxisSpacing: 8),
-                        itemBuilder: (context, index) {
-                          inspect(streamingServiceList[activeTabIndex]);
-                          return streamingServiceItem(context,
-                              streamingServiceList[activeTabIndex][index]);
-                        }) : const SizedBox(),
+                    child: streamingServiceList.isNotEmpty
+                        ? GridView.builder(
+                            padding: EdgeInsets.zero,
+                            shrinkWrap: true,
+                            physics: const NeverScrollableScrollPhysics(),
+                            itemCount:
+                                streamingServiceList[activeTabIndex].length,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 4,
+                                    childAspectRatio: 0.8,
+                                    mainAxisSpacing: 8,
+                                    crossAxisSpacing: 8),
+                            itemBuilder: (context, index) {
+                              inspect(streamingServiceList[activeTabIndex]);
+                              return streamingServiceItem(context,
+                                  streamingServiceList[activeTabIndex][index]);
+                            })
+                        : const SizedBox(),
                   ),
                   Container(
                       padding: padding16,
@@ -471,27 +531,139 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                       padding: padding16,
                       child: Text("Details",
                           style: Theme.of(context).textTheme.titleSmall)),
-                  /* ListView(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      ListTile(
-                        leading: Text(
-                          "Production Companies",
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall!
-                              .copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        trailing: ListView.builder(
-                          itemCount: movieDetail["production_companies"].length,
-                          itemBuilder: (BuildContext context, int index) {
-                            return Text(productionCompanies[index]["name"]);
-                          },
-                        ),
-                      )
-                    ],
-                  ) */
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 0, 8),
+                      child: Text(
+                        productionCompanies.length > 1
+                            ? "Production Companies"
+                            : "Production Company",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: productionCompanies.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> company =
+                            productionCompanies[index];
+                        return Container(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 0, 8),
+                          child: Row(
+                            children: [
+                              Flexible(
+                                flex: 1,
+                                child: Container(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: company["logo_path"] != null
+                                      ? ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: CachedNetworkImage(
+                                              width: 64,
+                                              imageUrl:
+                                                  "${Config().imageUrl}${Config().logoSize}${company["logo_path"]}"),
+                                        )
+                                      : const SizedBox(
+                                          width: 64,
+                                        ),
+                                ),
+                              ),
+                              Flexible(
+                                flex: 1,
+                                child: Text(
+                                  company["name"],
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      }),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 0, 8),
+                      child: Text(
+                        productionCompanies.length > 1
+                            ? "Production Countries"
+                            : "Production Country",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  ListView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      itemCount: productionCountries.length,
+                      itemBuilder: (context, index) {
+                        Map<String, dynamic> country =
+                            productionCountries[index];
+                        return Container(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 0, 8),
+                          child: Text(
+                            country["name"],
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        );
+                      }),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 0, 8),
+                      child: Text(
+                        "Budget",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 0, 8),
+                      child: Text(
+                        budget,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 0, 8),
+                      child: Text(
+                        "Revenue",
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium!
+                            .copyWith(fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: Alignment.topLeft,
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 0, 8),
+                      child: Text(
+                        revenue,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
