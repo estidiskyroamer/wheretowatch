@@ -1,4 +1,3 @@
-import 'dart:developer';
 import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -12,7 +11,6 @@ import 'package:wheretowatch/pages/tv/cast.dart';
 import 'package:wheretowatch/pages/tv/common.dart';
 import 'package:wheretowatch/pages/tv/crew.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
-import 'package:wheretowatch/pages/tv/season_detail.dart';
 import 'package:wheretowatch/service/tv.dart';
 
 class TVDetailScreen extends StatefulWidget {
@@ -70,7 +68,7 @@ class _TVDetailScreenState extends State<TVDetailScreen>
 
   @override
   void initState() {
-    handleMovieDetail();
+    handleTVDetail();
     _scrollController.addListener(_scrollListener);
     super.initState();
   }
@@ -82,7 +80,7 @@ class _TVDetailScreenState extends State<TVDetailScreen>
     super.dispose();
   }
 
-  handleMovieDetail() async {
+  handleTVDetail() async {
     dynamic result = await TV().getTVDetail(widget.tvId);
     dynamic countryCode = Prefs().preferences.getString("region");
     dynamic countryName = Prefs().preferences.getString("region_name");
