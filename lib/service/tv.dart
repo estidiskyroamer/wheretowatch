@@ -3,24 +3,24 @@ import 'dart:developer';
 import 'package:dio/dio.dart';
 import 'package:wheretowatch/common/config.dart';
 
-class Search {
+class TV {
 
-  getSearchMovie(String query, [int page = 1, String region = ""]) async {
+  getTVDetail(int id, [String language = ""]) async {
     try {
       final response = await Config().dio.get(
-          '${Config().baseUrl}/search/movie',
-          queryParameters: {'query': query, 'page': page, 'region': region});
+          '${Config().baseUrl}/tv/$id',
+          queryParameters: {'language': language, 'append_to_response': "watch/providers,releases,credits"});
       return response.data;
     } on DioException catch (e) {
       inspect(e.message);
     }
   }
 
-  getSearchTV(String query, [int page = 1, String region = ""]) async {
+  
+  getSeasonDetail(int id, int seasonNo) async {
     try {
       final response = await Config().dio.get(
-          '${Config().baseUrl}/search/tv',
-          queryParameters: {'query': query, 'page': page, 'region': region});
+          '${Config().baseUrl}/tv/$id/season/$seasonNo');
       return response.data;
     } on DioException catch (e) {
       inspect(e.message);

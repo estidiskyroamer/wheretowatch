@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:wheretowatch/common/config.dart';
-import 'package:wheretowatch/pages/movie/common.dart';
 import 'package:wheretowatch/pages/search/search_result.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
 import 'package:wheretowatch/service/trending.dart';

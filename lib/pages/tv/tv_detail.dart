@@ -8,26 +8,27 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/common/shared_preferences.dart';
-import 'package:wheretowatch/pages/movie/cast.dart';
-import 'package:wheretowatch/pages/movie/common.dart';
-import 'package:wheretowatch/pages/movie/crew.dart';
+import 'package:wheretowatch/pages/tv/cast.dart';
+import 'package:wheretowatch/pages/tv/common.dart';
+import 'package:wheretowatch/pages/tv/crew.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
-import 'package:wheretowatch/service/movie.dart';
+import 'package:wheretowatch/pages/tv/season_detail.dart';
+import 'package:wheretowatch/service/tv.dart';
 
-class MovieDetailScreen extends StatefulWidget {
-  final int movieId;
-  const MovieDetailScreen({super.key, required this.movieId});
+class TVDetailScreen extends StatefulWidget {
+  final int tvId;
+  const TVDetailScreen({super.key, required this.tvId});
 
   @override
-  State<MovieDetailScreen> createState() => _MovieDetailScreenState();
+  State<TVDetailScreen> createState() => _TVDetailScreenState();
 }
 
-class _MovieDetailScreenState extends State<MovieDetailScreen>
+class _TVDetailScreenState extends State<TVDetailScreen>
     with SingleTickerProviderStateMixin {
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
 
-  Map<String, dynamic> movieDetail = {};
+  Map<String, dynamic> tvDetail = {};
   String? _countryCode;
   String? _countryName;
   String? watchLink;
@@ -54,6 +55,9 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
     ),
   ];
 
+  List<dynamic> seasons = [];
+  int runtime = 0;
+
   List<dynamic> cast = [];
   List<dynamic> crew = [];
   List<dynamic> mainCrew = [];
@@ -79,49 +83,32 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   }
 
   handleMovieDetail() async {
-    dynamic result = await Movie().getMovieDetail(widget.movieId);
+    dynamic result = await TV().getTVDetail(widget.tvId);
     dynamic countryCode = Prefs().preferences.getString("region");
     dynamic countryName = Prefs().preferences.getString("region_name");
     if (mounted) {
       setState(() {
-        movieDetail = result;
+        tvDetail = result;
 
-        releaseDate = movieDetail.containsKey("release_date") &&
-                movieDetail["release_date"].toString().isNotEmpty
-            ? DateFormat("yyyy-MM-dd").parse(movieDetail["release_date"])
+        releaseDate = tvDetail.containsKey("first_air_date") &&
+                tvDetail["first_air_date"].toString().isNotEmpty
+            ? DateFormat("yyyy-MM-dd").parse(tvDetail["first_air_date"])
             : null;
 
         List<dynamic> genres =
-            movieDetail.containsKey("genres") && movieDetail["genres"] != null
-                ? movieDetail["genres"]
+            tvDetail.containsKey("genres") && tvDetail["genres"] != null
+                ? tvDetail["genres"]
                 : [];
         List<String> genreNames = genres.isNotEmpty
             ? genres.map((genre) => genre["name"] as String).toList()
             : [];
         genreNameList = genreNames.isNotEmpty ? genreNames.join(', ') : "";
 
-        List<dynamic> releases = movieDetail.containsKey("releases") &&
-                movieDetail["releases"]["countries"] != null
-            ? movieDetail["releases"]["countries"]
-            : [];
-
-        for (var item in releases) {
-          if (item["iso_3166_1"] == _countryCode &&
-              item["certification"] != "") {
-            certification = item["certification"];
-          } else {
-            if (item["iso_3166_1"] == "US") {
-              certification = item["certification"];
-            }
-          }
-        }
-
         _countryCode = countryCode;
         _countryName = countryName;
-        if (movieDetail["watch/providers"]["results"]
-            .containsKey(countryCode)) {
+        if (tvDetail["watch/providers"]["results"].containsKey(countryCode)) {
           Map<String, dynamic> watchProviders =
-              movieDetail["watch/providers"]["results"][countryCode];
+              tvDetail["watch/providers"]["results"][countryCode];
           List<dynamic> adStreaming =
               watchProviders.containsKey("ads") ? watchProviders["ads"] : [];
           List<dynamic> buyStreaming =
@@ -147,11 +134,11 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
           });
         });
 
-        if (movieDetail["credits"].containsKey("cast")) {
-          cast = movieDetail["credits"]["cast"];
+        if (tvDetail["credits"].containsKey("cast")) {
+          cast = tvDetail["credits"]["cast"];
         }
-        if (movieDetail["credits"].containsKey("crew")) {
-          crew = movieDetail["credits"]["crew"];
+        if (tvDetail["credits"].containsKey("crew")) {
+          crew = tvDetail["credits"]["crew"];
           List<dynamic> producers =
               crew.where((item) => item["job"] == "Producer").toList();
           List<dynamic> directors =
@@ -163,18 +150,21 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
           mainCrew = [...directors, ...producers, ...writers];
         }
 
-        productionCompanies = movieDetail["production_companies"];
-        productionCountries = movieDetail["production_countries"];
+        seasons = tvDetail["seasons"];
+        runtime = tvDetail["episode_run_time"].length > 0
+            ? tvDetail["episode_run_time"][0]
+            : 0;
 
-        if (movieDetail.containsKey("budget") &&
-            movieDetail["budget"] != null) {
-          budget = CurrencyFormatter.format(
-              movieDetail["budget"], CurrencyFormat.usd);
+        productionCompanies = tvDetail["production_companies"];
+        productionCountries = tvDetail["production_countries"];
+
+        if (tvDetail.containsKey("budget") && tvDetail["budget"] != null) {
+          budget =
+              CurrencyFormatter.format(tvDetail["budget"], CurrencyFormat.usd);
         }
-        if (movieDetail.containsKey("revenue") &&
-            movieDetail["revenue"] != null) {
-          revenue = CurrencyFormatter.format(
-              movieDetail["revenue"], CurrencyFormat.usd);
+        if (tvDetail.containsKey("revenue") && tvDetail["revenue"] != null) {
+          revenue =
+              CurrencyFormatter.format(tvDetail["revenue"], CurrencyFormat.usd);
         }
       });
     }
@@ -224,7 +214,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
         ],
       ),
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      body: movieDetail.entries.isEmpty
+      body: tvDetail.entries.isEmpty
           ? Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width / 6,
@@ -239,7 +229,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                     width: double.infinity,
                     height: MediaQuery.of(context).size.height / 3,
                     padding: padding16,
-                    decoration: movieDetail["backdrop_path"] != null
+                    decoration: tvDetail["backdrop_path"] != null
                         ? BoxDecoration(
                             image: DecorationImage(
                                 colorFilter: ColorFilter.mode(
@@ -247,7 +237,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                                     BlendMode.srcOver),
                                 fit: BoxFit.cover,
                                 image: NetworkImage(
-                                    "${Config().imageUrl}${Config().backdropSize}${movieDetail["backdrop_path"]}")))
+                                    "${Config().imageUrl}${Config().backdropSize}${tvDetail["backdrop_path"]}")))
                         : const BoxDecoration(color: Colors.transparent),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.end,
@@ -255,14 +245,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                       children: [
                         Text(
                           releaseDate != null
-                              ? "${movieDetail["title"]} (${releaseDate!.year})"
-                              : "${movieDetail["title"]}",
+                              ? "${tvDetail["name"]} (${releaseDate!.year})"
+                              : "${tvDetail["name"]}",
                           style: Theme.of(context).textTheme.titleLarge,
                           textAlign: TextAlign.center,
                         ),
-                        movieDetail["title"] != movieDetail["original_title"]
+                        tvDetail["name"] != tvDetail["original_name"]
                             ? Text(
-                                movieDetail["original_title"],
+                                tvDetail["original_name"],
                                 style: Theme.of(context).textTheme.labelMedium,
                                 textAlign: TextAlign.center,
                               )
@@ -273,8 +263,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                   Container(
                       padding: padding16,
                       child: Text(
-                        movieDetail["tagline"].isNotEmpty
-                            ? "\"${movieDetail["tagline"]}\""
+                        tvDetail["tagline"].isNotEmpty
+                            ? "\"${tvDetail["tagline"]}\""
                             : "",
                         style: Theme.of(context)
                             .textTheme
@@ -285,15 +275,15 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                     padding: padding16,
                     child: Row(
                       children: [
-                        movieDetail.containsKey("poster_path") &&
-                                movieDetail["poster_path"] != null
+                        tvDetail.containsKey("poster_path") &&
+                                tvDetail["poster_path"] != null
                             ? Flexible(
                                 flex: 2,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: CachedNetworkImage(
                                       imageUrl:
-                                          "${Config().imageUrl}${Config().posterSize}${movieDetail["poster_path"]}"),
+                                          "${Config().imageUrl}${Config().posterSize}${tvDetail["poster_path"]}"),
                                 ))
                             : const SizedBox(),
                         Flexible(
@@ -301,35 +291,20 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              certification.isNotEmpty
-                                  ? Container(
-                                      padding:
-                                          const EdgeInsets.fromLTRB(8, 2, 8, 2),
-                                      margin: const EdgeInsets.fromLTRB(
-                                          16, 0, 0, 16),
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: Colors.white, width: 1.0),
-                                          borderRadius:
-                                              BorderRadius.circular(4)),
-                                      child: Text(
-                                        certification,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .bodyMedium,
-                                      ),
-                                    )
-                                  : const SizedBox(),
                               iconWithText(context, FontAwesomeIcons.star,
-                                  "${double.parse((movieDetail["vote_average"]).toStringAsFixed(2))} (TMDB)"),
+                                  "${double.parse((tvDetail["vote_average"]).toStringAsFixed(2))} (TMDB)"),
                               iconWithText(
                                   context,
                                   FontAwesomeIcons.calendarCheck,
                                   releaseDate != null
-                                      ? "${movieDetail["status"]} ${DateFormat('d MMMM y').format(releaseDate!)}"
-                                      : movieDetail["status"]),
-                              iconWithText(context, FontAwesomeIcons.clock,
-                                  "${movieDetail["runtime"]} minutes"),
+                                      ? "${tvDetail["status"]}\nfirst aired ${DateFormat('d MMMM y').format(releaseDate!)}"
+                                      : tvDetail["status"]),
+                              runtime != 0
+                                  ? iconWithText(
+                                      context,
+                                      FontAwesomeIcons.clock,
+                                      "$runtime minutes per episode")
+                                  : const SizedBox(),
                               iconWithText(context, FontAwesomeIcons.film,
                                   genreNameList),
                             ],
@@ -384,11 +359,27 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                                     mainAxisSpacing: 8,
                                     crossAxisSpacing: 8),
                             itemBuilder: (context, index) {
-                              inspect(streamingServiceList[activeTabIndex]);
                               return streamingServiceItem(context,
                                   streamingServiceList[activeTabIndex][index]);
                             })
                         : const SizedBox(),
+                  ),
+                  Container(
+                      padding: padding16,
+                      child: Text("Seasons",
+                          style: Theme.of(context).textTheme.titleMedium)),
+                  Container(
+                    height: MediaQuery.of(context).size.height / 3,
+                    padding: padding16,
+                    child: ListView.builder(
+                      itemCount: seasons.length,
+                      shrinkWrap: true,
+                      physics: const ClampingScrollPhysics(),
+                      scrollDirection: Axis.horizontal,
+                      itemBuilder: (BuildContext context, int index) {
+                        return seasonItem(context, tvDetail, seasons[index]);
+                      },
+                    ),
                   ),
                   Container(
                       padding: padding16,
@@ -397,8 +388,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                   Container(
                       padding: padding16,
                       child: Text(
-                        movieDetail["overview"].isNotEmpty
-                            ? "${movieDetail["overview"]}"
+                        tvDetail["overview"].isNotEmpty
+                            ? "${tvDetail["overview"]}"
                             : "",
                         style: Theme.of(context).textTheme.bodyMedium,
                       )),
