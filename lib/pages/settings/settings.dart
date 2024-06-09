@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/common/shared_preferences.dart';
+import 'package:wheretowatch/models/country_model.dart';
 import 'package:wheretowatch/service/configuration.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -15,7 +16,7 @@ class SettingsScreen extends StatefulWidget {
 }
 
 class _SettingsScreenState extends State<SettingsScreen> {
-  List<dynamic> countries = [];
+  List<Country> countries = [];
   String? selectedCountry;
 
   @override
@@ -30,7 +31,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     dynamic result = await Configuration().getCountries();
     if (mounted) {
       setState(() {
-        countries = result;
+        countries = List<Country>.from(
+            result.map((x) => Country.fromJson(x)));
         selectedCountry = countryCode;
       });
     }
@@ -80,16 +82,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   ),
                   value: countries.isNotEmpty ? selectedCountry : null,
                   items: countries.map((country) {
-                    if (selectedCountry == country["iso_3166_1"]) {
+                    if (selectedCountry == country.countryCode) {
                       Prefs()
                           .preferences
-                          .setString("region_name", country["english_name"]);
+                          .setString("region_name", country.countryName);
                     }
                     return DropdownMenuItem<String>(
-                      value: country["iso_3166_1"],
+                      value: country.countryCode,
                       child: Text(
-                        country["english_name"],
-                        style: selectedCountry != country["iso_3166_1"]
+                        country.countryName,
+                        style: selectedCountry != country.countryCode
                             ? Theme.of(context).textTheme.bodyMedium
                             : Theme.of(context)
                                 .textTheme

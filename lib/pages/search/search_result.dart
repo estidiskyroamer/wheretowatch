@@ -1,8 +1,12 @@
+import 'dart:developer';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/common/shared_preferences.dart';
+import 'package:wheretowatch/models/search_result_model.dart';
 import 'package:wheretowatch/pages/movie/movie_detail.dart';
 import 'package:wheretowatch/pages/tv/tv_detail.dart';
 import 'package:wheretowatch/service/search.dart';
@@ -29,6 +33,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
   ];
   int activeTabIndex = 0;
   dynamic movieResult;
+  MovieSearchResults? movieResults;
   dynamic tvResult;
 
   @override
@@ -47,6 +52,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           });
         });
       movieResult = null;
+      movieResults = null;
       tvResult = null;
     });
     String? countryCode = Prefs().preferences.getString("region");
@@ -58,6 +64,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
     if (mounted) {
       setState(() {
         movieResult = movieResponse;
+        movieResults = MovieSearchResults.fromJson(movieResponse);
         tvResult = tvResponse;
 
       });
@@ -93,7 +100,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
       body: TabBarView(
         controller: tabController,
         children: [
-        movieResult == null
+        movieResults == null
           ? Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width / 6,
@@ -107,18 +114,14 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(12),
-                    itemCount: movieResult["results"].length,
+                    itemCount: movieResults!.searchResult.length,
                     itemBuilder: (context, index) {
-                      Map<String, dynamic> item = movieResult["results"][index];
-                      int page = movieResult["page"];
-                      DateTime? releaseDate =
-                          item.containsKey("release_date") &&
-                                  item["release_date"].toString().isNotEmpty
-                              ? DateFormat("yyyy-MM-dd")
-                                  .parse(item["release_date"])
-                              : null;
+                      MovieSearchResult result = movieResults!.searchResult[index];
+                      int page = movieResults!.page;
+                      
                       if (index < 5 && page == 1) {
-                        return item["backdrop_path"] != null
+                        inspect(result.backdropPath);
+                        return result.backdropPath.isNotEmpty
                             ? Container(
                                 decoration: BoxDecoration(
                                     image: DecorationImage(
@@ -126,48 +129,47 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                                             Colors.black.withAlpha(125),
                                             BlendMode.srcOver),
                                         fit: BoxFit.cover,
-                                        image: NetworkImage(
-                                            "${Config().imageUrl}${Config().backdropSize}${item["backdrop_path"]}")),
+                                        image: CachedNetworkImageProvider(result.backdropPath)),
                                     borderRadius: BorderRadius.circular(8)),
                                 padding:
                                     const EdgeInsets.fromLTRB(0, 16, 0, 16),
                                 margin: const EdgeInsets.only(bottom: 12),
                                 child:
-                                    movieResultItem(item, releaseDate, context),
+                                    movieResultItem(result, context),
                               )
-                            : movieResultItem(item, releaseDate, context);
+                            : movieResultItem(result, context);
                       }
-                      return movieResultItem(item, releaseDate, context);
+                      return movieResultItem(result, context);
                     },
                   ),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       IconButton(
-                          onPressed: movieResult["page"] != 1
+                          onPressed: movieResults!.page != 1
                               ? () {
-                                  handleSearch(movieResult["page"] - 1);
+                                  handleSearch(movieResults!.page - 1);
                                 }
                               : null,
                           icon: Icon(
                             FontAwesomeIcons.chevronLeft,
-                            color: movieResult["page"] != 1
+                            color: movieResults!.page != 1
                                 ? Colors.white
                                 : Colors.white.withAlpha(75),
                           )),
                       Text(
-                        "Page ${movieResult["page"]}/${movieResult["total_pages"]}",
+                        "Page ${movieResults!.page}/${movieResults!.totalPages}",
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       IconButton(
-                          onPressed: movieResult["page"] < movieResult["total_pages"]
+                          onPressed: movieResults!.page < movieResults!.totalPages
                               ? () {
-                                  handleSearch(movieResult["page"] + 1);
+                                  handleSearch(movieResults!.page + 1);
                                 }
                               : null,
                           icon: Icon(
                             FontAwesomeIcons.chevronRight,
-                            color: movieResult["page"] < movieResult["total_pages"]
+                            color: movieResults!.page < movieResults!.totalPages
                                 ? Colors.white
                                 : Colors.white.withAlpha(75),
                           ))
@@ -263,13 +265,13 @@ class _SearchResultScreenState extends State<SearchResultScreen>
     );
   }
 
-  ListTile movieResultItem(item, DateTime? releaseDate, BuildContext context) {
+  ListTile movieResultItem(MovieSearchResult item, BuildContext context) {
     return ListTile(
         onTap: () async {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => MovieDetailScreen(movieId: item["id"]),
+              builder: (context) => MovieDetailScreen(movieId: item.id),
             ),
           );
         },
@@ -278,14 +280,14 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              releaseDate != null
-                  ? "${item["title"]} (${releaseDate.year})"
-                  : "${item["title"]}",
+              item.releaseDate != null
+                  ? "${item.title} (${item.releaseDate!.year})"
+                  : "${item.title}",
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            item["original_title"] != item["title"]
+            item.originalTitle != item.title
                 ? Text(
-                    item["original_title"],
+                    item.originalTitle,
                     style: Theme.of(context).textTheme.labelSmall,
                   )
                 : const SizedBox(),
