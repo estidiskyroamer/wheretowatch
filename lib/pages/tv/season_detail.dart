@@ -37,9 +37,8 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
     if (mounted) {
       setState(() {
         seasonDetail = SeasonDetail.fromJson(result);
-        isLoading = false;
-
         episodes = seasonDetail.episodes;
+        isLoading = false;
       });
     }
   }
@@ -60,7 +59,7 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
           ),
         ),
         title: Text(
-          seasonDetail.name,
+          isLoading ? "" : seasonDetail.name,
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),

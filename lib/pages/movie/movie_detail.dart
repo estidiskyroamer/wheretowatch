@@ -94,7 +94,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
         _countryName = countryName;
 
         isLoading = false;
-
         movieDetail = MovieDetail.fromJson(result, _countryCode);
         releaseDate = movieDetail.releaseDate;
         List<dynamic> genres = movieDetail.genreList;

@@ -26,20 +26,24 @@ class WatchProviders {
   WatchProviders(this.link, this.rent, this.buy, this.flatrate, this.ads);
 
   WatchProviders.fromJson(Map<String, dynamic> json, String countryCode)
-      : link = json[countryCode]["link"],
-        rent = json[countryCode].containsKey("rent")
+      : link = json.containsKey(countryCode) ? json[countryCode]["link"] : "",
+        rent = json.containsKey(countryCode) &&
+                json[countryCode].containsKey("rent")
             ? List<WatchProvider>.from(
                 json[countryCode]["rent"].map((x) => WatchProvider.fromJson(x)))
             : [],
-        buy = json[countryCode].containsKey("buy")
+        buy = json.containsKey(countryCode) &&
+                json[countryCode].containsKey("buy")
             ? List<WatchProvider>.from(
                 json[countryCode]["buy"].map((x) => WatchProvider.fromJson(x)))
             : [],
-        flatrate = json[countryCode].containsKey("flatrate")
+        flatrate = json.containsKey(countryCode) &&
+                json[countryCode].containsKey("flatrate")
             ? List<WatchProvider>.from(json[countryCode]["flatrate"]
                 .map((x) => WatchProvider.fromJson(x)))
             : [],
-        ads = json[countryCode].containsKey("ads")
+        ads = json.containsKey(countryCode) &&
+                json[countryCode].containsKey("ads")
             ? List<WatchProvider>.from(
                 json[countryCode]["ads"].map((x) => WatchProvider.fromJson(x)))
             : [];

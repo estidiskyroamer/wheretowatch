@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
@@ -34,40 +35,43 @@ class _SearchResultScreenState extends State<SearchResultScreen>
   int activeTabIndex = 0;
   MovieSearchResults? movieResults;
   TVSearchResults? tvResults;
-  dynamic tvResult;
+  final _debouncer = Debouncer();
 
   @override
   void initState() {
     searchController.text = widget.searchQuery;
+
+    tabController = TabController(length: tabs.length, vsync: this);
+    tabController.addListener(() {
+      setState(() {
+        activeTabIndex = tabController.index;
+      });
+    });
     handleSearch(1);
     super.initState();
   }
 
   void handleSearch(int page, [String? query]) async {
-    setState(() {
-      tabController = TabController(length: tabs.length, vsync: this);
-      tabController.addListener(() {
-        setState(() {
-          activeTabIndex = tabController.index;
+    _debouncer.debounce(
+        duration: const Duration(milliseconds: 750),
+        onDebounce: () async {
+          setState(() {
+            movieResults = null;
+            tvResults = null;
+          });
+          String? countryCode = Prefs().preferences.getString("region");
+          String finalQuery = query ?? widget.searchQuery;
+          var movieResponse = await Search()
+              .getSearchMovie(finalQuery, page, countryCode ?? "");
+          var tvResponse =
+              await Search().getSearchTV(finalQuery, page, countryCode ?? "");
+          if (mounted) {
+            setState(() {
+              movieResults = MovieSearchResults.fromJson(movieResponse);
+              tvResults = TVSearchResults.fromJson(tvResponse);
+            });
+          }
         });
-      });
-      movieResults = null;
-      tvResults = null;
-      tvResult = null;
-    });
-    String? countryCode = Prefs().preferences.getString("region");
-    String finalQuery = query ?? widget.searchQuery;
-    var movieResponse =
-        await Search().getSearchMovie(finalQuery, page, countryCode ?? "");
-    var tvResponse =
-        await Search().getSearchTV(finalQuery, page, countryCode ?? "");
-    if (mounted) {
-      setState(() {
-        movieResults = MovieSearchResults.fromJson(movieResponse);
-        tvResults = TVSearchResults.fromJson(tvResponse);
-        tvResult = tvResponse;
-      });
-    }
   }
 
   @override
