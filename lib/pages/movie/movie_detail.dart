@@ -12,9 +12,9 @@ import 'package:wheretowatch/models/certification_model.dart';
 import 'package:wheretowatch/models/detail_model.dart';
 import 'package:wheretowatch/models/production_model.dart';
 import 'package:wheretowatch/models/watch_provider_model.dart';
-import 'package:wheretowatch/pages/movie/cast.dart';
+import 'package:wheretowatch/pages/common/cast.dart';
+import 'package:wheretowatch/pages/common/crew.dart';
 import 'package:wheretowatch/pages/movie/common.dart';
-import 'package:wheretowatch/pages/movie/crew.dart';
 import 'package:wheretowatch/pages/settings/settings.dart';
 import 'package:wheretowatch/service/movie.dart';
 
@@ -31,7 +31,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   final ScrollController _scrollController = ScrollController();
   bool _isScrolled = false;
 
-  Map<String, dynamic> movieDetailOld = {};
   late MovieDetail movieDetail;
   String _countryCode = "";
   String _countryName = "";
@@ -69,6 +68,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
   String budget = "";
   String revenue = "";
 
+  bool isLoading = true;
+
   @override
   void initState() {
     handleMovieDetail();
@@ -92,6 +93,8 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
         _countryCode = countryCode;
         _countryName = countryName;
 
+        isLoading = false;
+
         movieDetail = MovieDetail.fromJson(result, _countryCode);
         releaseDate = movieDetail.releaseDate;
         List<dynamic> genres = movieDetail.genreList;
@@ -104,43 +107,6 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
           watchProviders.rent,
           watchProviders.ads
         ];
-
-        movieDetailOld = result;
-
-        releaseDate = movieDetailOld.containsKey("release_date") &&
-                movieDetailOld["release_date"].toString().isNotEmpty
-            ? DateFormat("yyyy-MM-dd").parse(movieDetailOld["release_date"])
-            : null;
-
-        List<dynamic> genresB = movieDetailOld.containsKey("genres") &&
-                movieDetailOld["genres"] != null
-            ? movieDetailOld["genres"]
-            : [];
-        List<String> genreNames = genresB.isNotEmpty
-            ? genresB.map((genre) => genre["name"] as String).toList()
-            : [];
-        genreNameList = genreNames.isNotEmpty ? genreNames.join(', ') : "";
-
-        if (movieDetailOld["watch/providers"]["results"]
-            .containsKey(countryCode)) {
-          Map<String, dynamic> watchProviders =
-              movieDetailOld["watch/providers"]["results"][countryCode];
-          List<dynamic> adStreaming =
-              watchProviders.containsKey("ads") ? watchProviders["ads"] : [];
-          List<dynamic> buyStreaming =
-              watchProviders.containsKey("buy") ? watchProviders["buy"] : [];
-          List<dynamic> flatrateStreaming =
-              watchProviders.containsKey("flatrate")
-                  ? watchProviders["flatrate"]
-                  : [];
-        }
-        _tabController =
-            TabController(length: streamingServiceList.length, vsync: this);
-        _tabController.addListener(() {
-          setState(() {
-            activeTabIndex = _tabController.index;
-          });
-        });
 
         cast = movieDetail.castList;
         crew = movieDetail.crewList;
@@ -160,6 +126,14 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
             CurrencyFormatter.format(movieDetail.budget, CurrencyFormat.usd);
         revenue =
             CurrencyFormatter.format(movieDetail.revenue, CurrencyFormat.usd);
+
+        _tabController =
+            TabController(length: streamingServiceList.length, vsync: this);
+        _tabController.addListener(() {
+          setState(() {
+            activeTabIndex = _tabController.index;
+          });
+        });
       });
     }
   }
@@ -208,7 +182,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
         ],
       ),
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      body: movieDetailOld.entries.isEmpty
+      body: isLoading
           ? Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width / 6,
@@ -376,9 +350,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                   Container(
                       padding: padding16,
                       child: Text(
-                        movieDetailOld["overview"].isNotEmpty
-                            ? movieDetail.overview
-                            : "",
+                        movieDetail.overview,
                         style: Theme.of(context).textTheme.bodyMedium,
                       )),
                   Container(
@@ -406,8 +378,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      MovieCastScreen(cast: cast),
+                                  builder: (context) => CastScreen(cast: cast),
                                 ),
                               );
                             },
@@ -467,8 +438,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      MovieCrewScreen(crew: crew),
+                                  builder: (context) => CrewScreen(crew: crew),
                                 ),
                               );
                             },

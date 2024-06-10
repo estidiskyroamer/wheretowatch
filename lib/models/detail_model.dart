@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/models/certification_model.dart';
 import 'package:wheretowatch/models/production_model.dart';
+import 'package:wheretowatch/models/season_model.dart';
 import 'package:wheretowatch/models/watch_provider_model.dart';
 
 class MovieDetail {
@@ -106,12 +107,85 @@ class MovieDetail {
     }
     return null;
   }
+}
 
-  Map<String, dynamic> toJson() => {
-        "id": id,
-        "title": title,
-        "original_title": originalTitle,
-        "release_date": releaseDate,
-        "backdrop_path": backdropPath
-      };
+class TVDetail {
+  final int id;
+  final String name;
+  final String originalName;
+  final String tagline;
+  final String overview;
+  final DateTime? firstAirDate;
+  final String backdropPath;
+  final String posterPath;
+  final List<dynamic> genreList;
+  final int runtime;
+  final List<ProductionCompany> productionCompanies;
+  final List<ProductionCountry> productionCountries;
+  final List<Cast> castList;
+  final List<Crew> crewList;
+  final List<Season> seasonList;
+  final double voteAverage;
+  final String status;
+  final WatchProviders watchProviders;
+
+  TVDetail(
+      this.id,
+      this.name,
+      this.originalName,
+      this.tagline,
+      this.firstAirDate,
+      this.backdropPath,
+      this.genreList,
+      this.runtime,
+      this.voteAverage,
+      this.status,
+      this.watchProviders,
+      this.posterPath,
+      this.overview,
+      this.productionCompanies,
+      this.productionCountries,
+      this.castList,
+      this.crewList,
+      this.seasonList);
+
+  TVDetail.fromJson(Map<String, dynamic> json, String countryCode)
+      : id = json["id"],
+        name = json["name"],
+        originalName = json["original_name"],
+        tagline = json["tagline"],
+        overview = json["overview"],
+        firstAirDate = json.containsKey("first_air_date") &&
+                json["first_air_date"].toString().isNotEmpty
+            ? DateFormat("yyyy-MM-dd").parse(json["first_air_date"])
+            : null,
+        backdropPath = json.containsKey("backdrop_path") &&
+                json["backdrop_path"] != null
+            ? "${Config().imageUrl}${Config().backdropSize}${json["backdrop_path"]}"
+            : "",
+        posterPath = json.containsKey("poster_path") &&
+                json["poster_path"] != null
+            ? "${Config().imageUrl}${Config().backdropSize}${json["poster_path"]}"
+            : "",
+        genreList =
+            json["genres"].map((genre) => genre["name"] as String).toList(),
+        runtime = json["episode_run_time"].length > 0
+            ? json["episode_run_time"][0]
+            : 0,
+        productionCompanies = List<ProductionCompany>.from(
+            json["production_companies"]
+                .map((x) => ProductionCompany.fromJson(x))),
+        productionCountries = List<ProductionCountry>.from(
+            json["production_countries"]
+                .map((x) => ProductionCountry.fromJson(x))),
+        castList = List<Cast>.from(
+            json["credits"]["cast"].map((x) => Cast.fromJson(x))),
+        crewList = List<Crew>.from(
+            json["credits"]["crew"].map((x) => Crew.fromJson(x))),
+        voteAverage = json["vote_average"],
+        status = json["status"],
+        seasonList =
+            List<Season>.from(json["seasons"].map((x) => Season.fromJson(x))),
+        watchProviders = WatchProviders.fromJson(
+            json["watch/providers"]["results"], countryCode);
 }

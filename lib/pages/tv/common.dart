@@ -2,24 +2,24 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
+import 'package:wheretowatch/models/detail_model.dart';
 import 'package:wheretowatch/models/production_model.dart';
+import 'package:wheretowatch/models/season_model.dart';
+import 'package:wheretowatch/models/watch_provider_model.dart';
 import 'package:wheretowatch/pages/tv/season_detail.dart';
 
-Widget streamingServiceItem(BuildContext context, Map<String, dynamic> item) {
+Widget watchProviderItem(BuildContext context, WatchProvider item) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: CachedNetworkImage(
-            height: 48,
-            imageUrl:
-                "${Config().imageUrl}${Config().logoSize}${item["logo_path"]}"),
+        child: CachedNetworkImage(height: 48, imageUrl: item.logoPath),
       ),
       Container(
         padding: const EdgeInsets.only(top: 8),
         child: Text(
-          item["provider_name"],
+          item.providerName,
           style: Theme.of(context).textTheme.bodySmall,
           textAlign: TextAlign.center,
         ),
@@ -53,12 +53,8 @@ Widget iconWithText(BuildContext context, IconData iconData, String text) {
   );
 }
 
-Widget seasonItem(BuildContext context, Map<String, dynamic> tvItem,
-    Map<String, dynamic> seasonItem) {
-  DateTime? airDate = seasonItem.containsKey("air_date") &&
-          seasonItem["air_date"].toString().isNotEmpty
-      ? DateFormat("yyyy-MM-dd").parse(seasonItem["air_date"])
-      : null;
+Widget seasonItem(BuildContext context, TVDetail tvItem, Season seasonItem) {
+  DateTime? airDate = seasonItem.airDate;
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
@@ -68,8 +64,8 @@ Widget seasonItem(BuildContext context, Map<String, dynamic> tvItem,
             context,
             MaterialPageRoute(
               builder: (context) => SeasonDetailScreen(
-                tvId: int.parse(tvItem["id"].toString()),
-                seasonNo: int.parse(seasonItem["season_number"].toString()),
+                tvId: tvItem.id,
+                seasonNo: seasonItem.seasonNumber,
               ),
             ),
           );
@@ -79,8 +75,7 @@ Widget seasonItem(BuildContext context, Map<String, dynamic> tvItem,
           width: MediaQuery.of(context).size.width / 3,
           margin: const EdgeInsets.only(right: 8, bottom: 8),
           padding: padding4,
-          decoration: seasonItem["poster_path"] == null ||
-                  seasonItem["poster_path"] == "null"
+          decoration: seasonItem.posterPath.isEmpty
               ? BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
@@ -91,16 +86,15 @@ Widget seasonItem(BuildContext context, Map<String, dynamic> tvItem,
                   borderRadius: BorderRadius.circular(8),
                   image: DecorationImage(
                     fit: BoxFit.cover,
-                    image: CachedNetworkImageProvider(
-                        "${Config().imageUrl}${Config().posterSize}${seasonItem["poster_path"]}"),
+                    image: CachedNetworkImageProvider(seasonItem.posterPath),
                   ),
                 ),
         ),
       ),
       Text(
         airDate != null
-            ? "${seasonItem["name"]} (${airDate.year})"
-            : seasonItem["name"],
+            ? "${seasonItem.name} (${airDate.year})"
+            : seasonItem.name,
         maxLines: 2,
         overflow: TextOverflow.fade,
         style: Theme.of(context)
@@ -109,7 +103,7 @@ Widget seasonItem(BuildContext context, Map<String, dynamic> tvItem,
             .copyWith(fontWeight: FontWeight.bold),
       ),
       Text(
-        "${seasonItem["episode_count"]} episodes",
+        "${seasonItem.episodeCount} episodes",
         style: Theme.of(context).textTheme.bodySmall,
       ),
     ],

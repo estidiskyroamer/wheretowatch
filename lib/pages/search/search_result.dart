@@ -32,8 +32,8 @@ class _SearchResultScreenState extends State<SearchResultScreen>
     ),
   ];
   int activeTabIndex = 0;
-  dynamic movieResult;
   MovieSearchResults? movieResults;
+  TVSearchResults? tvResults;
   dynamic tvResult;
 
   @override
@@ -51,8 +51,8 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           activeTabIndex = tabController.index;
         });
       });
-      movieResult = null;
       movieResults = null;
+      tvResults = null;
       tvResult = null;
     });
     String? countryCode = Prefs().preferences.getString("region");
@@ -63,8 +63,8 @@ class _SearchResultScreenState extends State<SearchResultScreen>
         await Search().getSearchTV(finalQuery, page, countryCode ?? "");
     if (mounted) {
       setState(() {
-        movieResult = movieResponse;
         movieResults = MovieSearchResults.fromJson(movieResponse);
+        tvResults = TVSearchResults.fromJson(tvResponse);
         tvResult = tvResponse;
       });
     }
@@ -180,7 +180,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                       ],
                     ),
                   ),
-            tvResult == null
+            tvResults == null
                 ? Center(
                     child: SizedBox(
                       width: MediaQuery.of(context).size.width / 6,
@@ -194,19 +194,13 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                           shrinkWrap: true,
                           physics: const NeverScrollableScrollPhysics(),
                           padding: const EdgeInsets.all(12),
-                          itemCount: tvResult["results"].length,
+                          itemCount: tvResults!.searchResult.length,
                           itemBuilder: (context, index) {
-                            Map<String, dynamic> item =
-                                tvResult["results"][index];
-                            int page = tvResult["page"];
-                            DateTime? releaseDate = item
-                                        .containsKey("first_air_date") &&
-                                    item["first_air_date"].toString().isNotEmpty
-                                ? DateFormat("yyyy-MM-dd")
-                                    .parse(item["first_air_date"])
-                                : null;
+                            TVSearchResult item =
+                                tvResults!.searchResult[index];
+                            int page = tvResults!.page;
                             if (index < 5 && page == 1) {
-                              return item["backdrop_path"] != null
+                              return item.backdropPath.isNotEmpty
                                   ? Container(
                                       decoration: BoxDecoration(
                                           image: DecorationImage(
@@ -215,52 +209,50 @@ class _SearchResultScreenState extends State<SearchResultScreen>
                                                   BlendMode.srcOver),
                                               fit: BoxFit.cover,
                                               image: NetworkImage(
-                                                  "${Config().imageUrl}${Config().backdropSize}${item["backdrop_path"]}")),
+                                                  item.backdropPath)),
                                           borderRadius:
                                               BorderRadius.circular(8)),
                                       padding: const EdgeInsets.fromLTRB(
                                           0, 16, 0, 16),
                                       margin: const EdgeInsets.only(bottom: 12),
-                                      child: tvResultItem(
-                                          item, releaseDate, context),
+                                      child: tvResultItem(item, context),
                                     )
-                                  : tvResultItem(item, releaseDate, context);
+                                  : tvResultItem(item, context);
                             }
-                            return tvResultItem(item, releaseDate, context);
+                            return tvResultItem(item, context);
                           },
                         ),
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             IconButton(
-                                onPressed: tvResult["page"] != 1
+                                onPressed: tvResults!.page != 1
                                     ? () {
-                                        handleSearch(tvResult["page"] - 1);
+                                        handleSearch(tvResults!.page - 1);
                                       }
                                     : null,
                                 icon: Icon(
                                   FontAwesomeIcons.chevronLeft,
-                                  color: tvResult["page"] != 1
+                                  color: tvResults!.page != 1
                                       ? Colors.white
                                       : Colors.white.withAlpha(75),
                                 )),
                             Text(
-                              "Page ${tvResult["page"]}/${tvResult["total_pages"]}",
+                              "Page ${tvResults!.page}/${tvResults!.totalPages}",
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                             IconButton(
                                 onPressed:
-                                    tvResult["page"] < tvResult["total_pages"]
+                                    tvResults!.page < tvResults!.totalPages
                                         ? () {
-                                            handleSearch(tvResult["page"] + 1);
+                                            handleSearch(tvResults!.page + 1);
                                           }
                                         : null,
                                 icon: Icon(
                                   FontAwesomeIcons.chevronRight,
-                                  color:
-                                      tvResult["page"] < tvResult["total_pages"]
-                                          ? Colors.white
-                                          : Colors.white.withAlpha(75),
+                                  color: tvResults!.page < tvResults!.totalPages
+                                      ? Colors.white
+                                      : Colors.white.withAlpha(75),
                                 ))
                           ],
                         )
@@ -288,7 +280,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
             Text(
               item.releaseDate != null
                   ? "${item.title} (${item.releaseDate!.year})"
-                  : "${item.title}",
+                  : item.title,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             item.originalTitle != item.title
@@ -301,13 +293,13 @@ class _SearchResultScreenState extends State<SearchResultScreen>
         ));
   }
 
-  ListTile tvResultItem(item, DateTime? releaseDate, BuildContext context) {
+  ListTile tvResultItem(TVSearchResult item, BuildContext context) {
     return ListTile(
         onTap: () async {
           await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => TVDetailScreen(tvId: item["id"]),
+              builder: (context) => TVDetailScreen(tvId: item.id),
             ),
           );
         },
@@ -316,14 +308,14 @@ class _SearchResultScreenState extends State<SearchResultScreen>
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              releaseDate != null
-                  ? "${item["name"]} (${releaseDate.year})"
-                  : "${item["name"]}",
+              item.firstAirDate != null
+                  ? "${item.name} (${item.firstAirDate!.year})"
+                  : item.name,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
-            item["original_name"] != item["name"]
+            item.originalName != item.name
                 ? Text(
-                    item["original_name"],
+                    item.originalName,
                     style: Theme.of(context).textTheme.labelSmall,
                   )
                 : const SizedBox(),

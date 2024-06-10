@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:wheretowatch/common/config.dart';
+import 'package:wheretowatch/models/season_model.dart';
 import 'package:wheretowatch/service/tv.dart';
 
 class SeasonDetailScreen extends StatefulWidget {
@@ -17,9 +18,13 @@ class SeasonDetailScreen extends StatefulWidget {
 }
 
 class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
-  Map<String, dynamic> seasonDetail = {};
-  List<dynamic> episodes = [];
+  Map<String, dynamic> seasonDetailOld = {};
+  late SeasonDetail seasonDetail;
+  List<Episode> episodes = [];
+  List<dynamic> episodesOld = [];
   DateTime? releaseDate;
+
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -31,12 +36,10 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
     dynamic result = await TV().getSeasonDetail(widget.tvId, widget.seasonNo);
     if (mounted) {
       setState(() {
-        seasonDetail = result;
-        episodes = seasonDetail["episodes"];
-        releaseDate = seasonDetail.containsKey("air_date") &&
-                seasonDetail["air_date"].toString().isNotEmpty
-            ? DateFormat("yyyy-MM-dd").parse(seasonDetail["air_date"])
-            : null;
+        seasonDetail = SeasonDetail.fromJson(result);
+        isLoading = false;
+
+        episodes = seasonDetail.episodes;
       });
     }
   }
@@ -57,12 +60,12 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
           ),
         ),
         title: Text(
-          seasonDetail["name"] ?? "",
+          seasonDetail.name,
           style: Theme.of(context).textTheme.titleMedium,
         ),
       ),
       backgroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
-      body: seasonDetail.entries.isEmpty
+      body: isLoading
           ? Center(
               child: SizedBox(
                 width: MediaQuery.of(context).size.width / 6,
@@ -76,15 +79,13 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                     padding: padding16,
                     child: Row(
                       children: [
-                        seasonDetail.containsKey("poster_path") &&
-                                seasonDetail["poster_path"] != null
+                        seasonDetail.posterPath.isNotEmpty
                             ? Flexible(
                                 flex: 2,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(8),
                                   child: CachedNetworkImage(
-                                      imageUrl:
-                                          "${Config().imageUrl}${Config().posterSize}${seasonDetail["poster_path"]}"),
+                                      imageUrl: seasonDetail.posterPath),
                                 ))
                             : const SizedBox(),
                         Flexible(
@@ -92,7 +93,7 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                           child: Container(
                             padding: padding8,
                             child: Text(
-                              seasonDetail["overview"],
+                              seasonDetail.overview,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
                           ),
@@ -106,21 +107,18 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: episodes.length,
                       itemBuilder: (BuildContext context, int index) {
-                        Map<String, dynamic> episode = episodes[index];
-                        DateTime? airDate = episode["air_date"] != null
-                            ? DateFormat("yyyy-MM-dd")
-                                .parse(episode["air_date"])
-                            : null;
+                        Episode episode = episodes[index];
+                        DateTime? airDate = episode.airDate;
                         return ListTile(
                           shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16)),
                           tileColor: Theme.of(context).colorScheme.surfaceTint,
                           leading: Text(
-                            episode["episode_number"].toString(),
+                            episode.episodeNumber.toString(),
                             style: Theme.of(context).textTheme.titleMedium,
                           ),
                           title: Text(
-                            episode["name"],
+                            episode.name,
                             style: Theme.of(context).textTheme.titleSmall,
                           ),
                           subtitle: Column(
@@ -140,7 +138,7 @@ class _SeasonDetailScreenState extends State<SeasonDetailScreen> {
                               Container(
                                   padding: const EdgeInsets.only(top: 8),
                                   child: Text(
-                                    episode["overview"],
+                                    episode.overview,
                                     style:
                                         Theme.of(context).textTheme.bodyMedium,
                                   )),

@@ -4,15 +4,15 @@ import 'package:flutter_debouncer/flutter_debouncer.dart';
 import 'package:wheretowatch/common/config.dart';
 import 'package:wheretowatch/models/production_model.dart';
 
-class MovieCrewScreen extends StatefulWidget {
+class CrewScreen extends StatefulWidget {
   final List<Crew> crew;
-  const MovieCrewScreen({super.key, required this.crew});
+  const CrewScreen({super.key, required this.crew});
 
   @override
-  State<MovieCrewScreen> createState() => _MovieCrewScreenState();
+  State<CrewScreen> createState() => _CrewScreenState();
 }
 
-class _MovieCrewScreenState extends State<MovieCrewScreen> {
+class _CrewScreenState extends State<CrewScreen> {
   TextEditingController searchController = TextEditingController();
   List<Crew> filteredCrew = [];
   final _debouncer = Debouncer();
