@@ -20,7 +20,7 @@ class MovieSearchResult {
             ? DateFormat("yyyy-MM-dd").parse(json["release_date"])
             : null,
         backdropPath = json.containsKey("backdrop_path") &&
-                json["backdrop_path"].toString().isNotEmpty
+                json["backdrop_path"] != null
             ? "${Config().imageUrl}${Config().backdropSize}${json["backdrop_path"]}"
             : "";
 

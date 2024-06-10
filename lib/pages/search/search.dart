@@ -39,7 +39,6 @@ class _SearchScreenState extends State<SearchScreen> {
 
   void handleTrendingMovies() async {
     var response = await Trending().getTrendingMovies();
-    inspect(response);
     if (mounted) {
       setState(() {
         backdropResults = response;

@@ -1,22 +1,21 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:wheretowatch/common/config.dart';
+import 'package:wheretowatch/models/production_model.dart';
+import 'package:wheretowatch/models/watch_provider_model.dart';
 
-Widget streamingServiceItem(BuildContext context, Map<String, dynamic> item) {
+Widget watchProviderItem(BuildContext context, WatchProvider item) {
   return Column(
     crossAxisAlignment: CrossAxisAlignment.center,
     children: [
       ClipRRect(
         borderRadius: BorderRadius.circular(8),
-        child: CachedNetworkImage(
-            height: 48,
-            imageUrl:
-                "${Config().imageUrl}${Config().logoSize}${item["logo_path"]}"),
+        child: CachedNetworkImage(height: 48, imageUrl: item.logoPath),
       ),
       Container(
         padding: const EdgeInsets.only(top: 8),
         child: Text(
-          item["provider_name"],
+          item.providerName,
           style: Theme.of(context).textTheme.bodySmall,
           textAlign: TextAlign.center,
         ),
@@ -50,13 +49,13 @@ Widget iconWithText(BuildContext context, IconData iconData, String text) {
   );
 }
 
-Widget castItem(BuildContext context, Map<String, dynamic> item) {
+Widget castItem(BuildContext context, Cast item) {
   return Container(
     height: MediaQuery.of(context).size.height / 5,
     width: MediaQuery.of(context).size.width / 4,
     margin: const EdgeInsets.only(right: 8),
     padding: padding4,
-    decoration: item["profile_path"] == null || item["profile_path"] == "null"
+    decoration: item.profilePath.isEmpty
         ? BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
@@ -67,8 +66,7 @@ Widget castItem(BuildContext context, Map<String, dynamic> item) {
             borderRadius: BorderRadius.circular(8),
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: CachedNetworkImageProvider(
-                  "${Config().imageUrl}${Config().profileSize}${item["profile_path"]}"),
+              image: CachedNetworkImageProvider(item.profilePath),
             ),
           ),
     child: Column(
@@ -76,7 +74,7 @@ Widget castItem(BuildContext context, Map<String, dynamic> item) {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          item["name"],
+          item.name,
           maxLines: 2,
           overflow: TextOverflow.fade,
           style: Theme.of(context)
@@ -85,7 +83,7 @@ Widget castItem(BuildContext context, Map<String, dynamic> item) {
               .copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
-          item["character"],
+          item.character,
           maxLines: 3,
           overflow: TextOverflow.fade,
           style: Theme.of(context).textTheme.bodySmall,
@@ -95,13 +93,13 @@ Widget castItem(BuildContext context, Map<String, dynamic> item) {
   );
 }
 
-Widget crewItem(BuildContext context, Map<String, dynamic> item) {
+Widget crewItem(BuildContext context, Crew item) {
   return Container(
     height: MediaQuery.of(context).size.height / 5,
     width: MediaQuery.of(context).size.width / 4,
     margin: const EdgeInsets.only(right: 8),
     padding: padding4,
-    decoration: item["profile_path"] == null || item["profile_path"] == "null"
+    decoration: item.profilePath.isEmpty
         ? BoxDecoration(
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
@@ -112,8 +110,7 @@ Widget crewItem(BuildContext context, Map<String, dynamic> item) {
             borderRadius: BorderRadius.circular(8),
             image: DecorationImage(
               fit: BoxFit.cover,
-              image: CachedNetworkImageProvider(
-                  "${Config().imageUrl}${Config().profileSize}${item["profile_path"]}"),
+              image: CachedNetworkImageProvider(item.profilePath),
             ),
           ),
     child: Column(
@@ -121,14 +118,14 @@ Widget crewItem(BuildContext context, Map<String, dynamic> item) {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          item["name"],
+          item.name,
           style: Theme.of(context)
               .textTheme
               .bodySmall!
               .copyWith(fontWeight: FontWeight.bold),
         ),
         Text(
-          item["job"],
+          item.job,
           style: Theme.of(context).textTheme.bodySmall,
         ),
       ],
