@@ -134,17 +134,21 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   Flexible(
-                    flex: 1,
+                    flex: 2,
                     child: Container(
                       padding: padding16,
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
+                          const Image(
+                              width: 96,
+                              image: AssetImage('assets/images/finder.png')),
                           Text(
-                            "W2W",
-                            style: Theme.of(context).textTheme.titleLarge,
+                            "Where2Watch",
+                            style: Theme.of(context).textTheme.titleMedium,
                           ),
+                          Padding(padding: padding4),
                           Text(
                             "Powered by TMDB and JustWatch",
                             style: Theme.of(context).textTheme.labelSmall,

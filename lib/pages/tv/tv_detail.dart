@@ -191,7 +191,7 @@ class _TVDetailScreenState extends State<TVDetailScreen>
                 children: [
                   Container(
                     width: double.infinity,
-                    height: MediaQuery.of(context).size.height / 3,
+                    height: MediaQuery.of(context).size.height / 3.5,
                     padding: padding16,
                     decoration: tvDetail.backdropPath.isNotEmpty
                         ? BoxDecoration(
@@ -299,6 +299,7 @@ class _TVDetailScreenState extends State<TVDetailScreen>
                         unselectedLabelColor: Colors.white,
                         indicatorColor:
                             Theme.of(context).colorScheme.inversePrimary,
+                        indicatorSize: TabBarIndicatorSize.tab,
                         dividerHeight: 0,
                         tabs: tabs,
                       )),

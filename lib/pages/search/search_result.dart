@@ -96,6 +96,7 @@ class _SearchResultScreenState extends State<SearchResultScreen>
             labelColor: Theme.of(context).colorScheme.inversePrimary,
             unselectedLabelColor: Colors.white,
             indicatorColor: Theme.of(context).colorScheme.inversePrimary,
+            indicatorSize: TabBarIndicatorSize.tab,
             dividerHeight: 0,
             controller: tabController,
           ),

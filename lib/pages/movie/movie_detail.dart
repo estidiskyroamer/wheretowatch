@@ -194,7 +194,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                 children: [
                   Container(
                     width: double.infinity,
-                    height: MediaQuery.of(context).size.height / 3,
+                    height: MediaQuery.of(context).size.height / 3.5,
                     padding: padding16,
                     decoration: movieDetail.backdropPath.isNotEmpty
                         ? BoxDecoration(
@@ -318,6 +318,7 @@ class _MovieDetailScreenState extends State<MovieDetailScreen>
                         unselectedLabelColor: Colors.white,
                         indicatorColor:
                             Theme.of(context).colorScheme.inversePrimary,
+                        indicatorSize: TabBarIndicatorSize.tab,
                         dividerHeight: 0,
                         tabs: tabs,
                       )),

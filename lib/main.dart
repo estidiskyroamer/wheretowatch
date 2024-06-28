@@ -22,50 +22,53 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Where To Watch',
       theme: ThemeData(
+        fontFamily: 'Sarabun',
         colorSchemeSeed: HexColor("#092042"),
-        textTheme: TextTheme(
-          titleLarge: const TextStyle(
+        textTheme: const TextTheme(
+          titleLarge: TextStyle(
             fontSize: 36,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,
           ),
-          titleMedium: const TextStyle(
+          titleMedium: TextStyle(
             fontSize: 30,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,
           ),
-          titleSmall: const TextStyle(
+          titleSmall: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             height: 1.0,
           ),
-          bodyLarge: const TextStyle(
-            fontSize: 28,
+          bodyLarge: TextStyle(
+            fontSize: 22,
             color: Colors.white,
           ),
-          bodyMedium: const TextStyle(
+          bodyMedium: TextStyle(
             fontSize: 16,
             color: Colors.white,
           ),
-          bodySmall: const TextStyle(
+          bodySmall: TextStyle(
             fontSize: 12,
             color: Colors.white,
           ),
           labelLarge: TextStyle(
             fontSize: 18,
-            fontWeight: FontWeight.bold,
-            color: Colors.white.withAlpha(100),
+            fontWeight: FontWeight.w100,
+            color: Colors.white,
           ),
           labelMedium: TextStyle(
             fontSize: 16,
-            color: Colors.white.withAlpha(100),
+            fontWeight: FontWeight.w100,
+            color: Colors.white,
           ),
           labelSmall: TextStyle(
-            fontSize: 10,
-            color: Colors.white.withAlpha(100),
+            fontSize: 12,
+            fontWeight: FontWeight.w100,
+            color: Colors.white,
           ),
         ),
       ),
