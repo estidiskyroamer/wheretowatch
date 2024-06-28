@@ -54,7 +54,6 @@ Widget castItem(BuildContext context, Cast item) {
     height: MediaQuery.of(context).size.height / 5,
     width: MediaQuery.of(context).size.width / 4,
     margin: const EdgeInsets.only(right: 8),
-    padding: padding4,
     decoration: item.profilePath.isEmpty
         ? BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -69,26 +68,40 @@ Widget castItem(BuildContext context, Cast item) {
               image: CachedNetworkImageProvider(item.profilePath),
             ),
           ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          item.name,
-          maxLines: 2,
-          overflow: TextOverflow.fade,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall!
-              .copyWith(fontWeight: FontWeight.bold),
+    child: Container(
+      padding: padding4,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.black.withAlpha(200),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.5, 1.0],
         ),
-        Text(
-          item.character,
-          maxLines: 3,
-          overflow: TextOverflow.fade,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            item.name,
+            maxLines: 2,
+            overflow: TextOverflow.fade,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall!
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            item.character,
+            maxLines: 3,
+            overflow: TextOverflow.fade,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -98,7 +111,6 @@ Widget crewItem(BuildContext context, Crew item) {
     height: MediaQuery.of(context).size.height / 5,
     width: MediaQuery.of(context).size.width / 4,
     margin: const EdgeInsets.only(right: 8),
-    padding: padding4,
     decoration: item.profilePath.isEmpty
         ? BoxDecoration(
             borderRadius: BorderRadius.circular(8),
@@ -113,22 +125,36 @@ Widget crewItem(BuildContext context, Crew item) {
               image: CachedNetworkImageProvider(item.profilePath),
             ),
           ),
-    child: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          item.name,
-          style: Theme.of(context)
-              .textTheme
-              .bodySmall!
-              .copyWith(fontWeight: FontWeight.bold),
+    child: Container(
+      padding: padding4,
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.transparent,
+            Colors.black.withAlpha(200),
+          ],
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          stops: const [0.5, 1.0],
         ),
-        Text(
-          item.job,
-          style: Theme.of(context).textTheme.bodySmall,
-        ),
-      ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            item.name,
+            style: Theme.of(context)
+                .textTheme
+                .bodySmall!
+                .copyWith(fontWeight: FontWeight.bold),
+          ),
+          Text(
+            item.job,
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
     ),
   );
 }

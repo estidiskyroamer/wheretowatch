@@ -98,7 +98,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       BlendMode.srcATop),
                   fit: BoxFit.cover,
                   image: CachedNetworkImageProvider(
-                      "${Config().imageUrl}${Config().backdropSize}${backdrops[randomNumber]["backdrop_path"]}"),
+                      "${Config().imageUrl}${Config().backdropSizeLarge}${backdrops[randomNumber]["backdrop_path"]}"),
                 ),
               ),
               child: Column(
